@@ -3,36 +3,41 @@ const spec = {
   openapi: '3.0.3',
   info: {
     title: 'Shop API',
-    version: '1.1.0',
+    version: '1.2.0',
     description:
-      'API documentation for Auth, Goods, Categories, and Feedbacks.\n' +
-      'Пагинация/фильтры соответствуют текущим контроллерам. Auth — cookie-based с sessionId/accessToken/refreshToken.',
+      'API for Auth, Users, Orders, Goods, Categories, Feedbacks.\n' +
+      'Все пути идут с префиксом /api. Параметры и форматы соответствуют контроллерам.',
   },
   servers: [
-    { url: 'https://clothica-backend.onrender.com/', description: 'Render' },
+    {
+      url: 'https://clothica-go-it-prod-team-2-back.onrender.com',
+      description: 'render',
+    },
   ],
   tags: [
     { name: 'Auth' },
+    { name: 'Users' },
+    { name: 'Orders' },
     { name: 'Goods' },
     { name: 'Categories' },
     { name: 'Feedbacks' },
   ],
   paths: {
     // ===== AUTH =====
-    '/auth/register': {
+    '/api/auth/register': {
       post: {
         tags: ['Auth'],
-        summary: 'Register new user',
+        summary: 'Register new user (phone + password + name)',
         requestBody: {
           required: true,
           content: {
             'application/json': {
-              schema: { $ref: '#/components/schemas/AuthRegister' },
+              schema: { $ref: '#/components/schemas/AuthRegisterByPhone' },
               examples: {
                 register: {
                   value: {
-                    email: 'user@example.com',
-                    password: 'P@ssw0rd!',
+                    phone: '380991112233',
+                    password: 'P@ssw0rd1',
                     name: 'Vlad',
                   },
                 },
@@ -43,7 +48,7 @@ const spec = {
         responses: {
           201: {
             description:
-              'User created. Cookies sessionId/accessToken/refreshToken будут установлены Set-Cookie.',
+              'User created. Cookies sessionId/accessToken/refreshToken будут установлены через Set-Cookie.',
             headers: {
               'Set-Cookie': {
                 schema: { type: 'string' },
@@ -58,7 +63,7 @@ const spec = {
             },
           },
           400: {
-            description: 'Email in use / validation error',
+            description: 'Phone in use / validation error',
             content: {
               'application/json': {
                 schema: { $ref: '#/components/schemas/Error' },
@@ -69,18 +74,18 @@ const spec = {
         },
       },
     },
-    '/auth/login': {
+    '/api/auth/login': {
       post: {
         tags: ['Auth'],
-        summary: 'Login with email/password',
+        summary: 'Login by phone + password',
         requestBody: {
           required: true,
           content: {
             'application/json': {
-              schema: { $ref: '#/components/schemas/AuthLogin' },
+              schema: { $ref: '#/components/schemas/AuthLoginByPhone' },
               examples: {
                 login: {
-                  value: { email: 'user@example.com', password: 'P@ssw0rd!' },
+                  value: { phone: '380991112233', password: 'P@ssw0rd1' },
                 },
               },
             },
@@ -88,13 +93,11 @@ const spec = {
         },
         responses: {
           200: {
-            description:
-              'OK. Cookies sessionId/accessToken/refreshToken будут перезаписаны.',
+            description: 'OK (cookies re-set)',
             headers: {
               'Set-Cookie': {
                 schema: { type: 'string' },
-                description:
-                  'sessionId, accessToken, refreshToken (httpOnly). Устанавливаются в ответе.',
+                description: 'sessionId, accessToken, refreshToken (httpOnly).',
               },
             },
             content: {
@@ -115,27 +118,24 @@ const spec = {
         },
       },
     },
-    '/auth/logout': {
+    '/api/auth/logout': {
       post: {
         tags: ['Auth'],
         summary: 'Logout and clear cookies',
-        responses: {
-          204: { description: 'No Content (cookies cleared)' },
-        },
+        responses: { 204: { description: 'No Content (cookies cleared)' } },
       },
     },
-    '/auth/refresh': {
+    '/api/auth/refresh': {
       post: {
         tags: ['Auth'],
         summary: 'Refresh session using cookies (sessionId + refreshToken)',
         responses: {
           200: {
-            description: 'Session refreshed (cookies re-set)',
+            description: 'Session refreshed',
             headers: {
               'Set-Cookie': {
                 schema: { type: 'string' },
-                description:
-                  'sessionId, accessToken, refreshToken (httpOnly). Устанавливаются в ответе.',
+                description: 'sessionId, accessToken, refreshToken (httpOnly).',
               },
             },
             content: {
@@ -157,7 +157,7 @@ const spec = {
         },
       },
     },
-    '/auth/request-reset-email': {
+    '/api/auth/request-reset-email': {
       post: {
         tags: ['Auth'],
         summary: 'Send password reset link to email',
@@ -166,9 +166,6 @@ const spec = {
           content: {
             'application/json': {
               schema: { $ref: '#/components/schemas/ResetEmailRequest' },
-              examples: {
-                send: { value: { email: 'user@example.com' } },
-              },
             },
           },
         },
@@ -178,13 +175,6 @@ const spec = {
             content: {
               'application/json': {
                 schema: { $ref: '#/components/schemas/AuthMessage' },
-                examples: {
-                  ok: {
-                    value: {
-                      message: 'Password reset email sent successfully',
-                    },
-                  },
-                },
               },
             },
           },
@@ -200,7 +190,7 @@ const spec = {
         },
       },
     },
-    '/auth/reset-password': {
+    '/api/auth/reset-password': {
       post: {
         tags: ['Auth'],
         summary: 'Reset password with token from email',
@@ -209,14 +199,6 @@ const spec = {
           content: {
             'application/json': {
               schema: { $ref: '#/components/schemas/ResetPasswordRequest' },
-              examples: {
-                reset: {
-                  value: {
-                    token: 'jwt-token-from-email',
-                    password: 'NewStrongP@ss1',
-                  },
-                },
-              },
             },
           },
         },
@@ -226,14 +208,6 @@ const spec = {
             content: {
               'application/json': {
                 schema: { $ref: '#/components/schemas/AuthMessage' },
-                examples: {
-                  ok: {
-                    value: {
-                      message:
-                        'Password reset successfully. Please log in again.',
-                    },
-                  },
-                },
               },
             },
           },
@@ -251,8 +225,83 @@ const spec = {
       },
     },
 
+    // ===== USERS =====
+    '/api/users/me': {
+      get: {
+        tags: ['Users'],
+        summary: 'Get current authorized user',
+        responses: {
+          200: {
+            description: 'Current user',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/UserPublicWrap' },
+              },
+            },
+          },
+          401: {
+            description: 'Unauthorized',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+          404: { $ref: '#/components/responses/NotFound' },
+          500: { $ref: '#/components/responses/ServerError' },
+        },
+      },
+    },
+
+    // ===== ORDERS =====
+    '/api/orders': {
+      post: {
+        tags: ['Orders'],
+        summary: 'Create order from cart (uses x-session-id or req.user)',
+        parameters: [
+          {
+            name: 'x-session-id',
+            in: 'header',
+            required: false,
+            schema: { type: 'string' },
+            description: 'Session identifier to bind anonymous cart',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Order created and cart emptied',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: { data: { $ref: '#/components/schemas/Order' } },
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Cart empty',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+          401: {
+            description: 'Unauthorized (if required by middleware)',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+          500: { $ref: '#/components/responses/ServerError' },
+        },
+      },
+    },
+
     // ===== GOODS =====
-    '/goods': {
+    '/api/goods': {
       get: {
         tags: ['Goods'],
         summary: 'Get goods list with filters & pagination',
@@ -261,48 +310,42 @@ const spec = {
             name: 'page',
             in: 'query',
             schema: { type: 'integer', minimum: 1, default: 1 },
-            description: 'Page number (>=1)',
           },
           {
             name: 'perPage',
             in: 'query',
             schema: { type: 'integer', minimum: 1, maximum: 50, default: 10 },
-            description: 'Items per page (1..50)',
           },
           {
             name: 'category',
             in: 'query',
             schema: { type: 'string', format: 'objectId' },
-            description: 'Category ObjectId',
           },
           {
             name: 'size',
             in: 'query',
             schema: {
               oneOf: [
-                { type: 'string' }, // size=S
-                { type: 'array', items: { type: 'string' } }, // size=S&size=M
+                { type: 'string' },
+                { type: 'array', items: { type: 'string' } },
               ],
             },
-            description: 'Size or repeated sizes',
+            description: 'size=S или size=S&size=M',
           },
           {
             name: 'gender',
             in: 'query',
             schema: { type: 'string', enum: ['male', 'female', 'unisex'] },
-            description: 'Gender filter',
           },
           {
             name: 'minPrice',
             in: 'query',
             schema: { type: 'number', minimum: 0 },
-            description: 'Minimum price (by price.value)',
           },
           {
             name: 'maxPrice',
             in: 'query',
             schema: { type: 'number', minimum: 0 },
-            description: 'Maximum price (by price.value)',
           },
         ],
         responses: {
@@ -331,7 +374,7 @@ const spec = {
         },
       },
     },
-    '/goods/{goodId}': {
+    '/api/goods/{goodId}': {
       get: {
         tags: ['Goods'],
         summary: 'Get good by id',
@@ -360,7 +403,7 @@ const spec = {
     },
 
     // ===== CATEGORIES =====
-    '/categories': {
+    '/api/categories': {
       get: {
         tags: ['Categories'],
         summary: 'Get categories (aggregated from goods)',
@@ -404,7 +447,7 @@ const spec = {
     },
 
     // ===== FEEDBACKS =====
-    '/feedbacks': {
+    '/api/feedbacks': {
       get: {
         tags: ['Feedbacks'],
         summary: 'Get feedbacks for product',
@@ -424,7 +467,7 @@ const spec = {
             in: 'query',
             required: true,
             schema: { type: 'string', format: 'objectId' },
-            description: 'Good ObjectId to filter feedbacks',
+            description: 'Good ObjectId',
           },
         ],
         responses: {
@@ -481,7 +524,6 @@ const spec = {
   },
 
   components: {
-    // ====== SCHEMAS ======
     schemas: {
       ObjectId: {
         type: 'string',
@@ -502,34 +544,46 @@ const spec = {
         required: ['value', 'currency'],
       },
 
-      // ---- Auth
+      // ---- Auth / Users
       UserPublic: {
         type: 'object',
         properties: {
           _id: { $ref: '#/components/schemas/ObjectId' },
-          email: { type: 'string', format: 'email' },
+          username: { type: 'string', nullable: true },
+          email: { type: 'string', nullable: true },
           name: { type: 'string' },
+          phone: { type: 'number' },
           createdAt: { type: 'string', format: 'date-time', nullable: true },
           updatedAt: { type: 'string', format: 'date-time', nullable: true },
         },
-        required: ['_id', 'email', 'name'],
+        required: ['_id', 'name', 'phone'],
       },
-      AuthRegister: {
+      UserPublicWrap: {
+        type: 'object',
+        properties: { data: { $ref: '#/components/schemas/UserPublic' } },
+      },
+      AuthRegisterByPhone: {
         type: 'object',
         properties: {
-          email: { type: 'string', format: 'email' },
+          phone: {
+            type: 'string',
+            description: 'Digits only. Example: 380991112233',
+          },
           password: { type: 'string', minLength: 8 },
           name: { type: 'string' },
         },
-        required: ['email', 'password', 'name'],
+        required: ['phone', 'password', 'name'],
       },
-      AuthLogin: {
+      AuthLoginByPhone: {
         type: 'object',
         properties: {
-          email: { type: 'string', format: 'email' },
+          phone: {
+            type: 'string',
+            description: 'Digits only. Example: 380991112233',
+          },
           password: { type: 'string' },
         },
-        required: ['email', 'password'],
+        required: ['phone', 'password'],
       },
       ResetEmailRequest: {
         type: 'object',
@@ -547,6 +601,42 @@ const spec = {
       AuthMessage: {
         type: 'object',
         properties: { message: { type: 'string' } },
+      },
+
+      // ---- Orders
+      OrderItem: {
+        type: 'object',
+        properties: {
+          goodId: { $ref: '#/components/schemas/ObjectId' },
+          qty: { type: 'integer', minimum: 1 },
+          price: { type: 'number', minimum: 0 },
+          size: { type: 'string' },
+        },
+        required: ['goodId', 'qty', 'price'],
+      },
+      OrderTotals: {
+        type: 'object',
+        properties: {
+          subtotal: { type: 'number' },
+          shipping: { type: 'number' },
+          total: { type: 'number' },
+        },
+        required: ['subtotal', 'shipping', 'total'],
+      },
+      Order: {
+        type: 'object',
+        properties: {
+          _id: { $ref: '#/components/schemas/ObjectId' },
+          userId: { $ref: '#/components/schemas/ObjectId' },
+          items: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/OrderItem' },
+          },
+          totals: { $ref: '#/components/schemas/OrderTotals' },
+          status: { type: 'string', example: 'created' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
       },
 
       // ---- Domain
@@ -591,10 +681,9 @@ const spec = {
       },
       CategorySummary: {
         type: 'object',
-        description:
-          'Возвращается /categories из агрегирования по товарам + lookup реальной категории',
+        description: 'Результат агрегирования /api/categories',
         properties: {
-          _id: { $ref: '#/components/schemas/ObjectId' }, // id категории
+          _id: { $ref: '#/components/schemas/ObjectId' },
           name: { type: 'string' },
           image: { type: 'string' },
           goodsCount: { type: 'integer' },
@@ -625,16 +714,14 @@ const spec = {
           productId: { $ref: '#/components/schemas/ObjectId' },
           category: {
             type: 'string',
-            description:
-              'Опционально — если не передать, подставится name категории по productId',
+            description: 'Опционально — подставится по productId',
           },
           author: { type: 'string' },
           rate: { type: 'integer', minimum: 1, maximum: 5 },
           description: { type: 'string' },
           date: {
             type: 'string',
-            description:
-              'Опционально — если не передать, подставится текущая дата в формате YYYY-MM-DD',
+            description: 'Опционально — YYYY-MM-DD',
             example: '2025-10-15',
           },
         },
@@ -650,8 +737,6 @@ const spec = {
         },
       },
     },
-
-    // ====== COMMON RESPONSES ======
     responses: {
       BadRequest: {
         description: 'Validation error / bad request',
