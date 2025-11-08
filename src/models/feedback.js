@@ -4,7 +4,7 @@ import { Category } from './category.js';
 
 const feedbackSchema = new Schema(
   {
-    productId: {
+    goodId: {
       type: Schema.Types.ObjectId,
       ref: 'Goods',
       required: true,
@@ -39,10 +39,8 @@ const feedbackSchema = new Schema(
 
 feedbackSchema.pre('save', async function (next) {
   try {
-    if (this.productId && !this.category) {
-      const good = await Good.findById(this.productId)
-        .select('category')
-        .lean();
+    if (this.goodId && !this.category) {
+      const good = await Good.findById(this.goodId).select('category').lean();
       if (good?.category) {
         const cat = await Category.findById(good.category)
           .select('name')

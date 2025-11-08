@@ -5,7 +5,7 @@ export const getFeedbacksSchema = {
   [Segments.QUERY]: Joi.object({
     page: Joi.number().integer().min(1).default(1),
     perPage: Joi.number().integer().min(1).default(3),
-    productId: Joi.string().custom(objectIdValidator),
+    goodId: Joi.string().custom(objectIdValidator),
   }),
 };
 
@@ -22,6 +22,6 @@ export const createFeedbackSchema = {
       'any.required': 'Description is required',
     }),
     rate: Joi.number().min(1).max(5).required(),
-    productId: Joi.string().custom(objectIdValidator),
+    goodId: Joi.string().custom(objectIdValidator),
   }),
 };

@@ -1,9 +1,12 @@
-import { number, required } from 'joi';
 import { model, Schema } from 'mongoose';
 
 const userSchema = new Schema(
   {
-    username: {
+    firstName: {
+      type: String,
+      trim: true,
+    },
+    lastName: {
       type: String,
       trim: true,
     },
@@ -16,16 +19,11 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    name: {
-      type: String,
-      trim: true,
-      required: true,
-    },
     phone: {
       type: Number,
       unique: true,
-      required:true
-    }
+      required: true,
+    },
   },
   { timestamps: true, versionKey: false },
 );
