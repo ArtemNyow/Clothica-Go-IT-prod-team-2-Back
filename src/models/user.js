@@ -5,6 +5,7 @@ const userSchema = new Schema(
     firstName: {
       type: String,
       trim: true,
+      required: true,
     },
     lastName: {
       type: String,
@@ -23,6 +24,10 @@ const userSchema = new Schema(
       type: Number,
       unique: true,
       required: true,
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true, versionKey: false },

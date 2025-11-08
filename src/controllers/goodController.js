@@ -1,5 +1,6 @@
 import createHttpError from 'http-errors';
 import { Good } from '../models/good.js';
+import { Feedback } from '../models/feedback.js';
 
 export const getGoods = async (req, res, next) => {
   const {
@@ -54,15 +55,32 @@ export const getGoods = async (req, res, next) => {
 };
 
 export const getGoodById = async (req, res, next) => {
-  const { goodId } = req.params;
-  const good = await Good.findOne({
-    _id: goodId,
-  });
+  try {
+    const { goodId } = req.params;
 
-  if (!good) {
-    next(createHttpError(404, 'Good not found'));
-    return;
+    const [good, feedbacks] = await Promise.all([
+      Good.findById(goodId).lean(),
+      Feedback.find({ goodId }).lean(),
+    ]);
+
+    if (!good) {
+      return next(createHttpError(404, 'Good not found'));
+    }
+
+    const feedbackCount = feedbacks.length;
+    const avgRating =
+      feedbackCount > 0
+        ? feedbacks.reduce((sum, f) => sum + (f.rate || 0), 0) / feedbackCount
+        : 0;
+
+    const result = {
+      ...good,
+      feedbackCount,
+      avgRating: Number(avgRating.toFixed(1)),
+      feedbacks,
+    };
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
   }
-
-  res.status(200).json(good);
 };
