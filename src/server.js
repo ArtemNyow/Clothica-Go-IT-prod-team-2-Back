@@ -23,7 +23,7 @@ app.use(express.json());
 app.use(cors());
 app.use(cookieParser());
 
-app.use('api/docs', swaggerUi.serve, swaggerUi.setup(spec));
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(spec));
 
 app.use(categoryRoutes);
 app.use(goodRoutes);
