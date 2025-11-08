@@ -11,7 +11,7 @@ import {
 
 const router = Router();
 
-router.get('/feedbacks', celebrate(getFeedbacksSchema), getFeedbacks);
-router.post('/feedbacks', celebrate(createFeedbackSchema), createFeedback);
+router.get('/api/feedbacks', celebrate(getFeedbacksSchema), getFeedbacks);
+router.post('/api/feedbacks', celebrate(createFeedbackSchema), createFeedback);
 
 export default router;
