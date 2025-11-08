@@ -1,4 +1,4 @@
-import { required } from 'joi';
+import { number, required } from 'joi';
 import { model, Schema } from 'mongoose';
 
 const userSchema = new Schema(
@@ -10,7 +10,6 @@ const userSchema = new Schema(
     email: {
       type: String,
       unique: true,
-      required: true,
       trim: true,
     },
     password: {
@@ -22,6 +21,11 @@ const userSchema = new Schema(
       trim: true,
       required: true,
     },
+    phone: {
+      type: Number,
+      unique: true,
+      required:true
+    }
   },
   { timestamps: true, versionKey: false },
 );
