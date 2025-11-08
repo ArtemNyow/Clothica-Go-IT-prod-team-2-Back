@@ -1,4 +1,4 @@
-import createError from 'http-errors';
+import createHttpError from 'http-errors';
 import { Good } from '../models/good.js';
 
 export const getGoods = async (req, res, next) => {
@@ -13,10 +13,7 @@ export const getGoods = async (req, res, next) => {
   } = req.query;
   try {
     const pageNum = Math.max(1, parseInt(page ?? '1', 10));
-    const perPageNum = Math.min(
-      50,
-      Math.max(1, parseInt(perPage ?? '10', 10)),
-    );
+    const perPageNum = Math.min(50, Math.max(1, parseInt(perPage ?? '10', 10)));
     const skip = (pageNum - 1) * perPageNum;
 
     const filter = {};
@@ -29,8 +26,7 @@ export const getGoods = async (req, res, next) => {
       filter.size = { $in: size };
     }
 
-    if (gender)
-      filter.gender = gender;
+    if (gender) filter.gender = gender;
 
     if (minPrice || maxPrice) {
       filter['price.value'] = {};
@@ -40,10 +36,7 @@ export const getGoods = async (req, res, next) => {
 
     const [totalGoods, goods] = await Promise.all([
       Good.countDocuments(filter),
-      Good.find(filter)
-        .skip(skip)
-        .limit(perPageNum)
-        .lean(),
+      Good.find(filter).skip(skip).limit(perPageNum).lean(),
     ]);
 
     const totalPages = Math.max(1, Math.ceil(totalGoods / perPageNum));

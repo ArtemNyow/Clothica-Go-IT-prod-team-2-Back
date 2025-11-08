@@ -6,7 +6,7 @@ export const registerUserSchema = {
       .pattern(/^\d{9,15}$/)
       .required(),
     password: Joi.string().min(8).required(),
-    name: Joi.string().required(),
+    firstName: Joi.string().required(),
   }),
 };
 

@@ -2,9 +2,9 @@ import { Feedback } from '../models/feedback.js';
 import createHttpError from 'http-errors';
 
 export const getFeedbacks = async (req, res) => {
-  const { page = 1, perPage = 3, productId } = req.query;
+  const { page = 1, perPage = 3, goodId } = req.query;
   const skip = (page - 1) * perPage;
-  const feedbacksQuery = Feedback.find({ productId: productId });
+  const feedbacksQuery = Feedback.find({ goodId: goodId });
 
   const [totalFeedbacks, feedbacks] = await Promise.all([
     feedbacksQuery.clone().countDocuments(),

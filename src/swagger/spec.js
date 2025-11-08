@@ -58,7 +58,7 @@ const spec = {
             },
             content: {
               'application/json': {
-                schema: { $ref: '#/components/schemas/UserPublic' },
+                schema: { $ref: '#/components/schemas/User' },
               },
             },
           },
@@ -102,7 +102,7 @@ const spec = {
             },
             content: {
               'application/json': {
-                schema: { $ref: '#/components/schemas/UserPublic' },
+                schema: { $ref: '#/components/schemas/User' },
               },
             },
           },
@@ -157,101 +157,101 @@ const spec = {
         },
       },
     },
-    '/api/auth/request-reset-email': {
-      post: {
-        tags: ['Auth'],
-        summary: 'Send password reset link to email',
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: { $ref: '#/components/schemas/ResetEmailRequest' },
-            },
-          },
-        },
-        responses: {
-          200: {
-            description: 'Email sent',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/AuthMessage' },
-              },
-            },
-          },
-          404: {
-            description: 'User not found',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/Error' },
-              },
-            },
-          },
-          500: { $ref: '#/components/responses/ServerError' },
-        },
-      },
-    },
-    '/api/auth/reset-password': {
-      post: {
-        tags: ['Auth'],
-        summary: 'Reset password with token from email',
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: { $ref: '#/components/schemas/ResetPasswordRequest' },
-            },
-          },
-        },
-        responses: {
-          200: {
-            description: 'Password reset successfully',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/AuthMessage' },
-              },
-            },
-          },
-          401: {
-            description: 'Invalid or expired token',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/Error' },
-              },
-            },
-          },
-          404: { $ref: '#/components/responses/NotFound' },
-          500: { $ref: '#/components/responses/ServerError' },
-        },
-      },
-    },
+    // '/api/auth/request-reset-email': {
+    //   post: {
+    //     tags: ['Auth'],
+    //     summary: 'Send password reset link to email',
+    //     requestBody: {
+    //       required: true,
+    //       content: {
+    //         'application/json': {
+    //           schema: { $ref: '#/components/schemas/ResetEmailRequest' },
+    //         },
+    //       },
+    //     },
+    //     responses: {
+    //       200: {
+    //         description: 'Email sent',
+    //         content: {
+    //           'application/json': {
+    //             schema: { $ref: '#/components/schemas/AuthMessage' },
+    //           },
+    //         },
+    //       },
+    //       404: {
+    //         description: 'User not found',
+    //         content: {
+    //           'application/json': {
+    //             schema: { $ref: '#/components/schemas/Error' },
+    //           },
+    //         },
+    //       },
+    //       500: { $ref: '#/components/responses/ServerError' },
+    //     },
+    //   },
+    // },
+    // '/api/auth/reset-password': {
+    //   post: {
+    //     tags: ['Auth'],
+    //     summary: 'Reset password with token from email',
+    //     requestBody: {
+    //       required: true,
+    //       content: {
+    //         'application/json': {
+    //           schema: { $ref: '#/components/schemas/ResetPasswordRequest' },
+    //         },
+    //       },
+    //     },
+    //     responses: {
+    //       200: {
+    //         description: 'Password reset successfully',
+    //         content: {
+    //           'application/json': {
+    //             schema: { $ref: '#/components/schemas/AuthMessage' },
+    //           },
+    //         },
+    //       },
+    //       401: {
+    //         description: 'Invalid or expired token',
+    //         content: {
+    //           'application/json': {
+    //             schema: { $ref: '#/components/schemas/Error' },
+    //           },
+    //         },
+    //       },
+    //       404: { $ref: '#/components/responses/NotFound' },
+    //       500: { $ref: '#/components/responses/ServerError' },
+    //     },
+    //   },
+    // },
 
-    // ===== USERS =====
-    '/api/users/me': {
-      get: {
-        tags: ['Users'],
-        summary: 'Get current authorized user',
-        responses: {
-          200: {
-            description: 'Current user',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/UserPublicWrap' },
-              },
-            },
-          },
-          401: {
-            description: 'Unauthorized',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/Error' },
-              },
-            },
-          },
-          404: { $ref: '#/components/responses/NotFound' },
-          500: { $ref: '#/components/responses/ServerError' },
-        },
-      },
-    },
+    // // ===== USERS =====
+    // '/api/users/me': {
+    //   get: {
+    //     tags: ['Users'],
+    //     summary: 'Get current authorized user',
+    //     responses: {
+    //       200: {
+    //         description: 'Current user',
+    //         content: {
+    //           'application/json': {
+    //             schema: { $ref: '#/components/schemas/User' },
+    //           },
+    //         },
+    //       },
+    //       401: {
+    //         description: 'Unauthorized',
+    //         content: {
+    //           'application/json': {
+    //             schema: { $ref: '#/components/schemas/Error' },
+    //           },
+    //         },
+    //       },
+    //       404: { $ref: '#/components/responses/NotFound' },
+    //       500: { $ref: '#/components/responses/ServerError' },
+    //     },
+    //   },
+    // },
 
     // ===== ORDERS =====
     '/api/orders': {
@@ -463,7 +463,7 @@ const spec = {
             schema: { type: 'integer', minimum: 1, default: 3 },
           },
           {
-            name: 'productId',
+            name: 'goodId',
             in: 'query',
             required: true,
             schema: { type: 'string', format: 'objectId' },
@@ -545,23 +545,20 @@ const spec = {
       },
 
       // ---- Auth / Users
-      UserPublic: {
+      User: {
         type: 'object',
         properties: {
           _id: { $ref: '#/components/schemas/ObjectId' },
-          username: { type: 'string', nullable: true },
+          firstName: { type: 'string', nullable: true },
+          lastName: { type: 'string' },
           email: { type: 'string', nullable: true },
-          name: { type: 'string' },
           phone: { type: 'number' },
           createdAt: { type: 'string', format: 'date-time', nullable: true },
           updatedAt: { type: 'string', format: 'date-time', nullable: true },
         },
         required: ['_id', 'name', 'phone'],
       },
-      UserPublicWrap: {
-        type: 'object',
-        properties: { data: { $ref: '#/components/schemas/UserPublic' } },
-      },
+
       AuthRegisterByPhone: {
         type: 'object',
         properties: {
@@ -585,19 +582,19 @@ const spec = {
         },
         required: ['phone', 'password'],
       },
-      ResetEmailRequest: {
-        type: 'object',
-        properties: { email: { type: 'string', format: 'email' } },
-        required: ['email'],
-      },
-      ResetPasswordRequest: {
-        type: 'object',
-        properties: {
-          token: { type: 'string' },
-          password: { type: 'string', minLength: 8 },
-        },
-        required: ['token', 'password'],
-      },
+      // ResetEmailRequest: {
+      //   type: 'object',
+      //   properties: { email: { type: 'string', format: 'email' } },
+      //   required: ['email'],
+      // },
+      // ResetPasswordRequest: {
+      //   type: 'object',
+      //   properties: {
+      //     token: { type: 'string' },
+      //     password: { type: 'string', minLength: 8 },
+      //   },
+      //   required: ['token', 'password'],
+      // },
       AuthMessage: {
         type: 'object',
         properties: { message: { type: 'string' } },
@@ -693,7 +690,7 @@ const spec = {
         type: 'object',
         properties: {
           _id: { $ref: '#/components/schemas/ObjectId' },
-          productId: { $ref: '#/components/schemas/ObjectId' },
+          goodId: { $ref: '#/components/schemas/ObjectId' },
           category: { type: 'string', nullable: true },
           author: { type: 'string' },
           rate: { type: 'integer', minimum: 1, maximum: 5 },
@@ -706,15 +703,15 @@ const spec = {
           createdAt: { type: 'string', format: 'date-time' },
           updatedAt: { type: 'string', format: 'date-time' },
         },
-        required: ['productId', 'author', 'rate', 'description'],
+        required: ['goodId', 'author', 'rate', 'description'],
       },
       FeedbackCreate: {
         type: 'object',
         properties: {
-          productId: { $ref: '#/components/schemas/ObjectId' },
+          goodId: { $ref: '#/components/schemas/ObjectId' },
           category: {
             type: 'string',
-            description: 'Опционально — подставится по productId',
+            description: 'Опционально — подставится по Id',
           },
           author: { type: 'string' },
           rate: { type: 'integer', minimum: 1, maximum: 5 },
@@ -725,7 +722,7 @@ const spec = {
             example: '2025-10-15',
           },
         },
-        required: ['productId', 'author', 'rate', 'description'],
+        required: ['goodId', 'author', 'rate', 'description'],
       },
 
       Error: {
