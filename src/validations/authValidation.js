@@ -5,8 +5,8 @@ export const registerUserSchema = {
     phone: Joi.string()
       .pattern(/^\d{9,15}$/)
       .required(),
-    password: Joi.string().min(8).required(),
-    firstName: Joi.string().required(),
+    password: Joi.string().min(8).max(128).required(),
+    firstName: Joi.string().required().max(32),
   }),
 };
 

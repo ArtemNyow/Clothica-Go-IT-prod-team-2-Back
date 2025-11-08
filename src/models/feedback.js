@@ -6,7 +6,7 @@ const feedbackSchema = new Schema(
   {
     goodId: {
       type: Schema.Types.ObjectId,
-      ref: 'Goods',
+      ref: 'Good',
       required: true,
     },
     category: {
@@ -58,6 +58,19 @@ feedbackSchema.pre('save', async function (next) {
       this.date = `${yyyy}-${mm}-${dd}`;
     }
 
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
+feedbackSchema.post('save', async function (doc, next) {
+  try {
+    await Good.findByIdAndUpdate(
+      doc.goodId,
+      { $addToSet: { feedbacks: doc._id } },
+      { new: true },
+    );
     next();
   } catch (err) {
     next(err);
