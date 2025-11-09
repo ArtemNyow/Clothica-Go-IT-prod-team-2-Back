@@ -5,6 +5,10 @@ import { createSubscriptionSchema } from '../validations/subscriptionValidation.
 
 const router = express.Router();
 
-router.post('/subscriptions', celebrate(createSubscriptionSchema), createSubscription);
+router.post(
+  '/api/subscriptions',
+  celebrate(createSubscriptionSchema),
+  createSubscription,
+);
 
 export default router;

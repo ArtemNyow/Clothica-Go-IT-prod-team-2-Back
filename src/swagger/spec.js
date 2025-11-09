@@ -21,6 +21,7 @@ const spec = {
     { name: 'Goods' },
     { name: 'Categories' },
     { name: 'Feedbacks' },
+    { name: 'Subscriptions' },
   ],
   paths: {
     // ===== AUTH =====
@@ -157,101 +158,6 @@ const spec = {
         },
       },
     },
-    // '/api/auth/request-reset-email': {
-    //   post: {
-    //     tags: ['Auth'],
-    //     summary: 'Send password reset link to email',
-    //     requestBody: {
-    //       required: true,
-    //       content: {
-    //         'application/json': {
-    //           schema: { $ref: '#/components/schemas/ResetEmailRequest' },
-    //         },
-    //       },
-    //     },
-    //     responses: {
-    //       200: {
-    //         description: 'Email sent',
-    //         content: {
-    //           'application/json': {
-    //             schema: { $ref: '#/components/schemas/AuthMessage' },
-    //           },
-    //         },
-    //       },
-    //       404: {
-    //         description: 'User not found',
-    //         content: {
-    //           'application/json': {
-    //             schema: { $ref: '#/components/schemas/Error' },
-    //           },
-    //         },
-    //       },
-    //       500: { $ref: '#/components/responses/ServerError' },
-    //     },
-    //   },
-    // },
-    // '/api/auth/reset-password': {
-    //   post: {
-    //     tags: ['Auth'],
-    //     summary: 'Reset password with token from email',
-    //     requestBody: {
-    //       required: true,
-    //       content: {
-    //         'application/json': {
-    //           schema: { $ref: '#/components/schemas/ResetPasswordRequest' },
-    //         },
-    //       },
-    //     },
-    //     responses: {
-    //       200: {
-    //         description: 'Password reset successfully',
-    //         content: {
-    //           'application/json': {
-    //             schema: { $ref: '#/components/schemas/AuthMessage' },
-    //           },
-    //         },
-    //       },
-    //       401: {
-    //         description: 'Invalid or expired token',
-    //         content: {
-    //           'application/json': {
-    //             schema: { $ref: '#/components/schemas/Error' },
-    //           },
-    //         },
-    //       },
-    //       404: { $ref: '#/components/responses/NotFound' },
-    //       500: { $ref: '#/components/responses/ServerError' },
-    //     },
-    //   },
-    // },
-
-    // // ===== USERS =====
-    // '/api/users/me': {
-    //   get: {
-    //     tags: ['Users'],
-    //     summary: 'Get current authorized user',
-    //     responses: {
-    //       200: {
-    //         description: 'Current user',
-    //         content: {
-    //           'application/json': {
-    //             schema: { $ref: '#/components/schemas/User' },
-    //           },
-    //         },
-    //       },
-    //       401: {
-    //         description: 'Unauthorized',
-    //         content: {
-    //           'application/json': {
-    //             schema: { $ref: '#/components/schemas/Error' },
-    //           },
-    //         },
-    //       },
-    //       404: { $ref: '#/components/responses/NotFound' },
-    //       500: { $ref: '#/components/responses/ServerError' },
-    //     },
-    //   },
-    // },
 
     // ===== ORDERS =====
     '/api/orders': {
@@ -330,7 +236,7 @@ const spec = {
                 { type: 'array', items: { type: 'string' } },
               ],
             },
-            description: 'size=S или size=S&size=M',
+            description: 'size=S або size=S&size=M',
           },
           {
             name: 'gender',
@@ -521,6 +427,57 @@ const spec = {
         },
       },
     },
+
+    // ===== SUBSCRIPTIONS =====
+    '/api/subscriptions': {
+      post: {
+        tags: ['Subscriptions'],
+        summary: 'Create new email subscription',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/SubscriptionCreate' },
+              examples: {
+                subscription: { value: { email: 'example@mail.com' } },
+              },
+            },
+          },
+        },
+        responses: {
+          201: {
+            description: 'Subscription created successfully',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Subscription' },
+                examples: {
+                  ok: {
+                    value: {
+                      message:
+                        'Дякуємо за підписку! Ви будете в курсі всіх новин та акцій',
+                      data: {
+                        _id: '671a8a4b7f6b9a001234abc1',
+                        email: 'example@mail.com',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          409: {
+            description: 'Email already subscribed',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          500: { $ref: '#/components/responses/ServerError' },
+        },
+      },
+    },
   },
 
   components: {
@@ -550,13 +507,13 @@ const spec = {
         properties: {
           _id: { $ref: '#/components/schemas/ObjectId' },
           firstName: { type: 'string', nullable: true },
-          lastName: { type: 'string' },
+          lastName: { type: 'string', nullable: true },
           email: { type: 'string', nullable: true },
-          phone: { type: 'number' },
+          phone: { type: 'string', example: '380991112233' },
           createdAt: { type: 'string', format: 'date-time', nullable: true },
           updatedAt: { type: 'string', format: 'date-time', nullable: true },
         },
-        required: ['_id', 'name', 'phone'],
+        required: ['_id', 'phone'],
       },
 
       AuthRegisterByPhone: {
@@ -582,19 +539,6 @@ const spec = {
         },
         required: ['phone', 'password'],
       },
-      // ResetEmailRequest: {
-      //   type: 'object',
-      //   properties: { email: { type: 'string', format: 'email' } },
-      //   required: ['email'],
-      // },
-      // ResetPasswordRequest: {
-      //   type: 'object',
-      //   properties: {
-      //     token: { type: 'string' },
-      //     password: { type: 'string', minLength: 8 },
-      //   },
-      //   required: ['token', 'password'],
-      // },
       AuthMessage: {
         type: 'object',
         properties: { message: { type: 'string' } },
@@ -606,7 +550,7 @@ const spec = {
         properties: {
           goodId: { $ref: '#/components/schemas/ObjectId' },
           qty: { type: 'integer', minimum: 1 },
-          price: { type: 'number', minimum: 0 },
+          price: { $ref: '#/components/schemas/Price' },
           size: { type: 'string' },
         },
         required: ['goodId', 'qty', 'price'],
@@ -650,115 +594,77 @@ const spec = {
           feedbacks: {
             type: 'array',
             items: { $ref: '#/components/schemas/ObjectId' },
+            nullable: true,
           },
           prevDescription: { type: 'string', nullable: true },
-          gender: { type: 'string', enum: ['male', 'female', 'unisex'] },
-          characteristics: { type: 'array', items: { type: 'string' } },
-          createdAt: { type: 'string', format: 'date-time' },
-          updatedAt: { type: 'string', format: 'date-time' },
+          gender: {
+            type: 'string',
+            enum: ['male', 'female', 'unisex'],
+            nullable: true,
+          },
         },
-        required: [
-          'name',
-          'category',
-          'image',
-          'price',
-          'description',
-          'gender',
-        ],
+        required: ['_id', 'name', 'category', 'price'],
       },
-      Category: {
-        type: 'object',
-        properties: {
-          _id: { $ref: '#/components/schemas/ObjectId' },
-          name: { type: 'string' },
-          createdAt: { type: 'string', format: 'date-time' },
-          updatedAt: { type: 'string', format: 'date-time' },
-        },
-        required: ['name'],
-      },
+
       CategorySummary: {
         type: 'object',
-        description: 'Результат агрегирования /api/categories',
         properties: {
           _id: { $ref: '#/components/schemas/ObjectId' },
           name: { type: 'string' },
-          image: { type: 'string' },
-          goodsCount: { type: 'integer' },
+          totalGoods: { type: 'integer' },
         },
+        required: ['_id', 'name', 'totalGoods'],
       },
+
       Feedback: {
         type: 'object',
         properties: {
           _id: { $ref: '#/components/schemas/ObjectId' },
           goodId: { $ref: '#/components/schemas/ObjectId' },
-          category: { type: 'string', nullable: true },
           author: { type: 'string' },
-          rate: { type: 'integer', minimum: 1, maximum: 5 },
           description: { type: 'string' },
-          date: {
-            type: 'string',
-            description: 'YYYY-MM-DD',
-            example: '2025-10-15',
-          },
-          createdAt: { type: 'string', format: 'date-time' },
-          updatedAt: { type: 'string', format: 'date-time' },
+          date: { type: 'string', format: 'date-time' },
         },
-        required: ['goodId', 'author', 'rate', 'description'],
+        required: ['_id', 'goodId', 'author', 'description', 'date'],
       },
       FeedbackCreate: {
         type: 'object',
         properties: {
           goodId: { $ref: '#/components/schemas/ObjectId' },
-          category: {
-            type: 'string',
-            description: 'Необов’язково — підставиться за Id.',
-          },
           author: { type: 'string' },
-          rate: { type: 'integer', minimum: 1, maximum: 5 },
           description: { type: 'string' },
-          date: {
-            type: 'string',
-            description: 'Необов’язково — YYYY-MM-DD',
-            example: '2025-10-15',
-          },
         },
-        required: ['goodId', 'author', 'rate', 'description'],
+        required: ['goodId', 'author', 'description'],
       },
 
-      Error: {
+      // ---- Subscriptions
+      Subscription: {
         type: 'object',
         properties: {
-          status: { type: 'integer' },
-          message: { type: 'string' },
-          details: { type: 'object', nullable: true },
+          _id: { $ref: '#/components/schemas/ObjectId' },
+          email: { type: 'string', format: 'email' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
         },
+        required: ['_id', 'email'],
+      },
+      SubscriptionCreate: {
+        type: 'object',
+        properties: { email: { type: 'string', format: 'email' } },
+        required: ['email'],
+      },
+
+      // ---- Common
+      Error: {
+        type: 'object',
+        properties: { message: { type: 'string' } },
       },
     },
+
     responses: {
-      BadRequest: {
-        description: 'Validation error / bad request',
-        content: {
-          'application/json': {
-            schema: { $ref: '#/components/schemas/Error' },
-          },
-        },
-      },
-      NotFound: {
-        description: 'Resource not found',
-        content: {
-          'application/json': {
-            schema: { $ref: '#/components/schemas/Error' },
-          },
-        },
-      },
-      ServerError: {
-        description: 'Internal server error',
-        content: {
-          'application/json': {
-            schema: { $ref: '#/components/schemas/Error' },
-          },
-        },
-      },
+      ServerError: { description: 'Internal server error' },
+      BadRequest: { description: 'Bad request' },
+      NotFound: { description: 'Not found' },
     },
   },
 };

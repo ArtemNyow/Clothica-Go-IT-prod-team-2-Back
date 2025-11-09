@@ -17,17 +17,17 @@ import { isAdmin } from '../middleware/isAdmin.js';
 
 const router = express.Router();
 
-router.post('/orders', celebrate(createOrderSchema), createOrder);
+router.post('/api/orders', celebrate(createOrderSchema), createOrder);
 
 router.get(
-  '/orders/my',
+  '/api/orders/my',
   authenticate,
   celebrate(getUserOrdersSchema),
   getUserOrders,
 );
 
 router.get(
-  '/orders/all',
+  '/api/orders/all',
   authenticate,
   isAdmin,
   celebrate(getAllOrdersSchema),
@@ -35,7 +35,7 @@ router.get(
 );
 
 router.patch(
-  '/orders/:id/status',
+  '/api/orders/:id/status',
   authenticate,
   isAdmin,
   celebrate(updateOrderStatusSchema),
