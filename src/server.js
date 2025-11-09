@@ -18,7 +18,6 @@ import feedbackRoutes from './routes/feedbackRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
-const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
 
 app.use(logger);
 app.use(express.json());
