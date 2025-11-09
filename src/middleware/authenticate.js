@@ -1,13 +1,32 @@
-import jwt from 'jsonwebtoken';
-export function authenticate(req, res, next) {
-  const header = req.headers.authorization || '';
-  if (!header.startsWith('Bearer ')) return res.status(401).json({ message: 'Unauthorized' });
-  const token = header.slice(7);
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
-    req.user = payload;
-    next();
-  } catch {
-    return res.status(401).json({ message: 'Invalid token' });
+import createHttpError from 'http-errors';
+import { Session } from '../models/session.js';
+import User from '../models/user.js';
+
+export const authenticate = async (req, res, next) => {
+  if (!req.cookies.accessToken) {
+    next(createHttpError(401, 'Missing access token'));
+    return;
   }
-}
+
+  const session = await Session.findOne({
+    accessToken: req.cookies.accessToken,
+  });
+
+  if (!session) {
+    next(createHttpError(401, 'Session not found'));
+    return;
+  }
+  const isAccessTokenExpired =
+    new Date() > new Date(session.accessTokenValidUntil);
+  if (isAccessTokenExpired) {
+    return next(createHttpError(401, 'Access token expired'));
+  }
+  const user = await User.findById(session.userId);
+
+  if (!user) {
+    next(createHttpError(401));
+    return;
+  }
+  req.user = user;
+  next();
+};
