@@ -18,11 +18,20 @@ import feedbackRoutes from './routes/feedbackRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
 
 app.use(logger);
 app.use(express.json());
 app.use(
   cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS: Origin ${origin} not allowed`));
+      }
+    },
     credentials: true,
   }),
 );
