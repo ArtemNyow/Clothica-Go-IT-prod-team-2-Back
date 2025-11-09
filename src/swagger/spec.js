@@ -6,7 +6,7 @@ const spec = {
     version: '1.2.0',
     description:
       'API for Auth, Users, Orders, Goods, Categories, Feedbacks.\n' +
-      'Все пути идут с префиксом /api. Параметры и форматы соответствуют контроллерам.',
+      'Усі шляхи мають префікс /api, а методи й формати відповідають контролерам.',
   },
   servers: [
     {
@@ -48,12 +48,12 @@ const spec = {
         responses: {
           201: {
             description:
-              'User created. Cookies sessionId/accessToken/refreshToken будут установлены через Set-Cookie.',
+              'User created. Cookies sessionId/accessToken/refreshToken будуть встановлені через Set-Cookie.',
             headers: {
               'Set-Cookie': {
                 schema: { type: 'string' },
                 description:
-                  'sessionId, accessToken, refreshToken (httpOnly). Устанавливаются в ответе.',
+                  'sessionId, accessToken, refreshToken (httpOnly). Установлюється в відповіді.',
               },
             },
             content: {
@@ -711,14 +711,14 @@ const spec = {
           goodId: { $ref: '#/components/schemas/ObjectId' },
           category: {
             type: 'string',
-            description: 'Опционально — подставится по Id',
+            description: 'Необов’язково — підставиться за Id.',
           },
           author: { type: 'string' },
           rate: { type: 'integer', minimum: 1, maximum: 5 },
           description: { type: 'string' },
           date: {
             type: 'string',
-            description: 'Опционально — YYYY-MM-DD',
+            description: 'Необов’язково — YYYY-MM-DD',
             example: '2025-10-15',
           },
         },
