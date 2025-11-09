@@ -1,37 +1,37 @@
-import { required } from 'joi';
 import { model, Schema } from 'mongoose';
 
 const userSchema = new Schema(
   {
-    username: {
+    name: {
       type: String,
-      trim: true,
-    },
-    email: {
-      type: String,
-      unique: true,
       required: true,
       trim: true,
+      minlength: 2,
+      maxlength: 50,
+    },
+    phone: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      match: /^\+380\d{9}$/,
     },
     password: {
       type: String,
       required: true,
+      minlength: 6,
     },
-    name: {
+    role: {
       type: String,
-      trim: true,
-      required: true,
+      enum: ['user', 'admin'],
+      default: 'user',
     },
   },
-  { timestamps: true, versionKey: false },
-);
-
-userSchema.pre('save', function (next) {
-  if (!this.username) {
-    this.username = this.email;
+  {
+    timestamps: true,
+    versionKey: false
   }
-  next();
-});
+);
 
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
@@ -39,4 +39,14 @@ userSchema.methods.toJSON = function () {
   return obj;
 };
 
-export const User = model('User', userSchema);
+userSchema.statics.findByPhone = function (phone) {
+  return this.findOne({ phone });
+};
+
+
+const User = model('User', userSchema);
+
+export default User;
+
+
+
