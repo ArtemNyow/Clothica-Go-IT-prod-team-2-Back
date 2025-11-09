@@ -12,15 +12,12 @@ import { errorHandler } from './middleware/errorHandler.js';
 
 import categoryRoutes from './routes/categoryRoutes.js';
 import goodRoutes from './routes/goodRoutes.js';
-import authRouter from './routes/authRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
 import subscriptionRoutes from './routes/subscriptionRoutes.js';
 
 import swaggerUi from 'swagger-ui-express';
 import spec from './swagger/spec.js';
-import authRouter from './routes/authRoutes.js';
-import feedbackRoutes from './routes/feedbackRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
