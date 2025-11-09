@@ -11,6 +11,7 @@ import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 import categoryRoutes from './routes/categoryRoutes.js';
+import authRouter from './routes/authRoutes.js';
 import goodRoutes from './routes/goodRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
