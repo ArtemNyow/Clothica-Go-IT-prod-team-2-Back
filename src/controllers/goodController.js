@@ -1,5 +1,6 @@
-import createError from 'http-errors';
+import createHttpError from 'http-errors';
 import { Good } from '../models/good.js';
+import { Feedback } from '../models/feedback.js';
 
 export const getGoods = async (req, res, next) => {
   const {
@@ -13,10 +14,7 @@ export const getGoods = async (req, res, next) => {
   } = req.query;
   try {
     const pageNum = Math.max(1, parseInt(page ?? '1', 10));
-    const perPageNum = Math.min(
-      50,
-      Math.max(1, parseInt(perPage ?? '10', 10)),
-    );
+    const perPageNum = Math.min(50, Math.max(1, parseInt(perPage ?? '10', 10)));
     const skip = (pageNum - 1) * perPageNum;
 
     const filter = {};
@@ -29,8 +27,7 @@ export const getGoods = async (req, res, next) => {
       filter.size = { $in: size };
     }
 
-    if (gender)
-      filter.gender = gender;
+    if (gender) filter.gender = gender;
 
     if (minPrice || maxPrice) {
       filter['price.value'] = {};
@@ -40,10 +37,7 @@ export const getGoods = async (req, res, next) => {
 
     const [totalGoods, goods] = await Promise.all([
       Good.countDocuments(filter),
-      Good.find(filter)
-        .skip(skip)
-        .limit(perPageNum)
-        .lean(),
+      Good.find(filter).skip(skip).limit(perPageNum).lean(),
     ]);
 
     const totalPages = Math.max(1, Math.ceil(totalGoods / perPageNum));
@@ -61,15 +55,32 @@ export const getGoods = async (req, res, next) => {
 };
 
 export const getGoodById = async (req, res, next) => {
-  const { goodId } = req.params;
-  const good = await Good.findOne({
-    _id: goodId,
-  });
+  try {
+    const { goodId } = req.params;
 
-  if (!good) {
-    next(createHttpError(404, 'Good not found'));
-    return;
+    const [good, feedbacks] = await Promise.all([
+      Good.findById(goodId).lean(),
+      Feedback.find({ goodId }).lean(),
+    ]);
+
+    if (!good) {
+      return next(createHttpError(404, 'Good not found'));
+    }
+
+    const feedbackCount = feedbacks.length;
+    const avgRating =
+      feedbackCount > 0
+        ? feedbacks.reduce((sum, f) => sum + (f.rate || 0), 0) / feedbackCount
+        : 0;
+
+    const result = {
+      ...good,
+      feedbackCount,
+      avgRating: Number(avgRating.toFixed(1)),
+      feedbacks,
+    };
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
   }
-
-  res.status(200).json(good);
 };

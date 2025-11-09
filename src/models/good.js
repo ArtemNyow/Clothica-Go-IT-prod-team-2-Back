@@ -52,7 +52,7 @@ const goodSchema = new Schema(
     },
     feedbacks: {
       type: [Schema.Types.ObjectId],
-      ref: 'Review',
+      ref: 'Feedback',
       default: [],
     },
     prevDescription: {

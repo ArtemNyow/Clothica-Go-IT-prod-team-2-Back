@@ -23,7 +23,7 @@ router.get(
   '/orders/my',
   authenticate,
   celebrate(getUserOrdersSchema),
-  getUserOrders
+  getUserOrders,
 );
 
 router.get(
@@ -31,16 +31,15 @@ router.get(
   authenticate,
   isAdmin,
   celebrate(getAllOrdersSchema),
-  getAllOrders
+  getAllOrders,
 );
-
 
 router.patch(
   '/orders/:id/status',
   authenticate,
   isAdmin,
   celebrate(updateOrderStatusSchema),
-  updateOrderStatus
+  updateOrderStatus,
 );
 
 export default router;

@@ -4,9 +4,9 @@ import { Category } from './category.js';
 
 const feedbackSchema = new Schema(
   {
-    productId: {
+    goodId: {
       type: Schema.Types.ObjectId,
-      ref: 'Goods',
+      ref: 'Good',
       required: true,
     },
     category: {
@@ -39,10 +39,8 @@ const feedbackSchema = new Schema(
 
 feedbackSchema.pre('save', async function (next) {
   try {
-    if (this.productId && !this.category) {
-      const good = await Good.findById(this.productId)
-        .select('category')
-        .lean();
+    if (this.goodId && !this.category) {
+      const good = await Good.findById(this.goodId).select('category').lean();
       if (good?.category) {
         const cat = await Category.findById(good.category)
           .select('name')
@@ -60,6 +58,19 @@ feedbackSchema.pre('save', async function (next) {
       this.date = `${yyyy}-${mm}-${dd}`;
     }
 
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
+feedbackSchema.post('save', async function (doc, next) {
+  try {
+    await Good.findByIdAndUpdate(
+      doc.goodId,
+      { $addToSet: { feedbacks: doc._id } },
+      { new: true },
+    );
     next();
   } catch (err) {
     next(err);

@@ -6,7 +6,7 @@ import { getGoodsSchema } from '../validations/goodValidation.js';
 
 const router = Router();
 
-router.get('/goods', celebrate(getGoodsSchema), getGoods);
-router.get('/goods/:goodId', celebrate(idSchema), getGoodById);
+router.get('/api/goods', celebrate(getGoodsSchema), getGoods);
+router.get('/api/goods/:goodId', celebrate(idSchema), getGoodById);
 
 export default router;

@@ -5,6 +5,6 @@ import { celebrate } from 'celebrate';
 import { getCategoriesSchema } from '../validations/categoryValidation.js';
 const router = express.Router();
 
-router.get('/categories', celebrate(getCategoriesSchema), getCategories);
+router.get('/api/categories', celebrate(getCategoriesSchema), getCategories);
 
 export default router;

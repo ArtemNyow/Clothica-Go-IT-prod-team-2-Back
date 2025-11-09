@@ -12,23 +12,32 @@ import { errorHandler } from './middleware/errorHandler.js';
 
 import categoryRoutes from './routes/categoryRoutes.js';
 import goodRoutes from './routes/goodRoutes.js';
+import authRouter from './routes/authRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
 import subscriptionRoutes from './routes/subscriptionRoutes.js';
 
 import swaggerUi from 'swagger-ui-express';
 import spec from './swagger/spec.js';
+import authRouter from './routes/authRoutes.js';
+import feedbackRoutes from './routes/feedbackRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
 
 app.use(logger);
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  }),
+);
 app.use(cookieParser());
 
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(spec));
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(spec));
 
+app.use(authRouter);
 app.use(categoryRoutes);
 app.use(goodRoutes);
 app.use(feedbackRoutes);
