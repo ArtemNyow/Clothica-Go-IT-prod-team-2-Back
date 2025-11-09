@@ -24,14 +24,7 @@ app.use(logger);
 app.use(express.json());
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error(`CORS: Origin ${origin} not allowed`));
-      }
-    },
+    origin: 'http://localhost:3000',
     credentials: true,
   }),
 );
