@@ -12,6 +12,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import goodRoutes from './routes/goodRoutes.js';
 import authRouter from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import swaggerUi from 'swagger-ui-express';
 import spec from './swagger/spec.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
@@ -35,6 +36,7 @@ app.use(authRouter);
 app.use(categoryRoutes);
 app.use(goodRoutes);
 app.use(feedbackRoutes);
+app.use(userRoutes);
 
 app.use(notFoundHandler);
 

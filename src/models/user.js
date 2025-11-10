@@ -28,6 +28,14 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    city: {
+      type: String,
+      required: true,
+    },
+    postOffice: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true, versionKey: false },
 );
@@ -46,3 +54,4 @@ userSchema.methods.toJSON = function () {
 };
 
 export const User = model('User', userSchema);
+export default User;
