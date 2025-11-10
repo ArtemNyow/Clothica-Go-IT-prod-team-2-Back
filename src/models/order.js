@@ -24,9 +24,8 @@ const orderItemSchema = new Schema(
       required: true,
     },
   },
-  { _id: false }
+  { _id: false },
 );
-
 
 const shippingInfoSchema = new Schema(
   {
@@ -52,16 +51,18 @@ const shippingInfoSchema = new Schema(
     },
     comment: String,
   },
-  { _id: false }
+  { _id: false },
 );
-
-
 
 const orderSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
+    },
+    guestSession: {
+      type: String,
+      default: null,
     },
     orderNumber: {
       type: String,
@@ -96,7 +97,7 @@ const orderSchema = new Schema(
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
 
 orderSchema.pre('save', async function (next) {
@@ -109,4 +110,3 @@ orderSchema.pre('save', async function (next) {
 });
 
 export const Order = model('Order', orderSchema);
-
