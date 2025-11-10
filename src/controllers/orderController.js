@@ -1,133 +1,147 @@
-import createHttpError from 'http-errors';
 import { Order } from '../models/order.js';
-import { ORDER_STATUS, STATUS } from '../constants/status.js';
+import { User } from '../models/user.js';
 
-const generateOrderNumber = () => {
-  const timestamp = Date.now().toString(36).toUpperCase();
-  const random = Math.random().toString(36).substring(2, 7).toUpperCase();
-  return `ORD-${timestamp}-${random}`;
+const generateOrderNumber = async () => {
+  const date = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+  const count = await Order.countDocuments();
+  return `№${date}${(count + 1).toString().padStart(3, '0')}`;
 };
 
-export const createOrder = async (req, res, next) => {
-  const sessionId = req.header('x-session-id');
-  const userId = req.user?._id;
-  const { shippingInfo } = req.body;
+export const createOrderController = async (req, res, next) => {
+  try {
+    const { items, shippingInfo } = req.body;
+    const user = req.user || null;
+    const sessionId = req.header('x-session-id');
 
-  // const cart = await Cart.findOne({
-  //   $or: [{ sessionId }, { userId }],
-  // }).populate('items.goodId');
+    if (!items || items.length === 0) {
+      return res
+        .status(400)
+        .json({ message: 'Не вказано товари для замовлення' });
+    }
 
-  // if (!cart || cart.items.length === 0) {
-  //   next(createHttpError(400, 'Cart is empty'));
-  //   return;
-  // }
-
-  // const subtotal = cart.items.reduce((sum, item) => {
-  //   return sum + item.price * item.qty;
-  // }, 0);
-
-  const shipping = subtotal >= 1000 ? 0 : 50;
-  const total = subtotal + shipping;
-
-  // const order = await Order.create({
-  //   orderNumber: generateOrderNumber(), // Генеруємо унікальний номер
-  //   userId: userId || null,
-  //   items: cart.items.map((item) => ({
-  //     goodId: item.goodId._id,
-  //     size: item.size,
-  //     qty: item.qty,
-  //     price: item.price,
-  //   })),
-  //   shippingInfo,
-  //   totals: {
-  //     subtotal,
-  //     shipping,
-  //     total,
-  //   },
-  //   status: STATUS.IN_PROGRESS,
-  // });
-
-  // cart.items = [];
-  // await cart.save();
-
-  await order.populate('items.goodId');
-
-  res.status(201).json({
-    message: 'Order created successfully',
-    data: order,
-  });
-};
-
-export const getUserOrders = async (req, res) => {
-  const userId = req.user.userId;
-
-  const orders = await Order.find({ userId })
-    .populate('items.goodId')
-    .sort({ createdAt: -1 });
-
-  res.status(200).json({
-    message: 'Orders retrieved successfully',
-    data: orders,
-  });
-};
-
-export const updateOrderStatus = async (req, res, next) => {
-  const { id } = req.params;
-  const { status } = req.body;
-
-  if (!ORDER_STATUS.includes(status)) {
-    next(
-      createHttpError(
-        400,
-        `Невірний статус. Допустимі: ${ORDER_STATUS.join(', ')}`,
-      ),
+    const subtotal = items.reduce(
+      (sum, item) => sum + item.price * item.qty,
+      0,
     );
-    return;
+    const shipping = subtotal >= 1000 ? 0 : 50;
+    const total = subtotal + shipping;
+    const orderNumber = await generateOrderNumber();
+
+    const orderData = {
+      userId: user?._id || null,
+      guestSession: user ? null : sessionId || null,
+      orderNumber,
+      items,
+      shippingInfo,
+      totals: { subtotal, shipping, total },
+    };
+
+    if (!user) {
+      const existingUser = await User.findOne({ phone: shippingInfo.phone });
+      if (existingUser) {
+        orderData.userId = existingUser._id;
+        orderData.guestSession = null;
+        if (sessionId) {
+          await Order.updateMany(
+            {
+              guestSession: sessionId,
+              'shippingInfo.phone': shippingInfo.phone,
+            },
+            { $set: { userId: existingUser._id, guestSession: null } },
+          );
+        }
+      }
+    }
+
+    const order = await Order.create(orderData);
+    await order.populate('items.goodId');
+
+    res
+      .status(201)
+      .json({ message: 'Order created successfully', data: order });
+  } catch (err) {
+    next(err);
   }
-
-  const order = await Order.findById(id).populate('items.goodId');
-
-  if (!order) {
-    next(createHttpError(404, 'Замовлення не знайдено'));
-    return;
-  }
-
-  order.status = status;
-  await order.save();
-
-  res.status(200).json({
-    message: 'Статус замовлення оновлено',
-    data: order,
-  });
 };
 
-export const getAllOrders = async (req, res) => {
-  const { status, page = 1, limit = 20 } = req.query;
-  const skip = (page - 1) * limit;
+export const getUserOrdersController = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { page = 1, limit = 20 } = req.query;
+    const skip = (page - 1) * limit;
 
-  const ordersQuery = Order.find();
-
-  if (status) {
-    ordersQuery.where('status').equals(status);
-  }
-
-  const [totalOrders, orders] = await Promise.all([
-    ordersQuery.clone().countDocuments(),
-    ordersQuery
+    const ordersQuery = Order.find({ userId })
       .populate('items.goodId')
-      .populate('userId', 'name email')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Number(limit)),
-  ]);
+      .sort({ createdAt: -1 });
+    const [totalOrders, orders] = await Promise.all([
+      ordersQuery.clone().countDocuments(),
+      ordersQuery.skip(skip).limit(Number(limit)),
+    ]);
 
-  const totalPages = Math.ceil(totalOrders / limit);
-  res.status(200).json({
-    message: 'All orders retrieved successfully',
-    page: Number(page),
-    perPage: Number(limit),
-    totalOrders,
-    totalPages,
-    data: orders,
-  });
+    const totalPages = Math.ceil(totalOrders / limit);
+
+    res.status(200).json({
+      message: 'Orders retrieved successfully',
+      page: Number(page),
+      perPage: Number(limit),
+      totalOrders,
+      totalPages,
+      data: orders,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getAllOrdersController = async (req, res, next) => {
+  try {
+    const { status, page = 1, limit = 20 } = req.query;
+    const skip = (page - 1) * limit;
+
+    const ordersQuery = Order.find();
+    if (status) ordersQuery.where('status').equals(status);
+
+    const [totalOrders, orders] = await Promise.all([
+      ordersQuery.clone().countDocuments(),
+      ordersQuery
+        .populate('items.goodId')
+        .populate('userId', 'name email')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Number(limit)),
+    ]);
+
+    const totalPages = Math.ceil(totalOrders / limit);
+
+    res.status(200).json({
+      message: 'All orders retrieved successfully',
+      page: Number(page),
+      perPage: Number(limit),
+      totalOrders,
+      totalPages,
+      data: orders,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateOrderStatusController = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const order = await Order.findById(id).populate('items.goodId');
+    if (!order)
+      return res.status(404).json({ message: 'Замовлення не знайдено' });
+
+    order.status = status;
+    await order.save();
+
+    res
+      .status(200)
+      .json({ message: 'Статус замовлення оновлено', data: order });
+  } catch (err) {
+    next(err);
+  }
 };
