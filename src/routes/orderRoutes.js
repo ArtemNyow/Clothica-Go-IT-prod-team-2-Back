@@ -1,29 +1,36 @@
 import express from 'express';
 import { celebrate } from 'celebrate';
 import {
-  createOrder,
-  getUserOrders,
-  updateOrderStatus,
-  getAllOrders,
+  createOrderController,
+  getUserOrdersController,
+  getAllOrdersController,
+  updateOrderStatusController,
 } from '../controllers/orderController.js';
+
+import { authenticate } from '../middleware/authenticate.js';
+import { isAdmin } from '../middleware/isAdmin.js';
 import {
   createOrderSchema,
   getUserOrdersSchema,
-  updateOrderStatusSchema,
   getAllOrdersSchema,
+  updateOrderStatusSchema,
 } from '../validations/orderValidation.js';
-import { authenticate } from '../middleware/authenticate.js';
-import { isAdmin } from '../middleware/isAdmin.js';
+import { optionalAuthenticate } from '../middleware/optionalAuthenticate.js';
 
 const router = express.Router();
 
-router.post('/api/orders', celebrate(createOrderSchema), createOrder);
+router.post(
+  '/api/orders',
+  optionalAuthenticate,
+  celebrate(createOrderSchema),
+  createOrderController,
+);
 
 router.get(
   '/api/orders/my',
   authenticate,
   celebrate(getUserOrdersSchema),
-  getUserOrders,
+  getUserOrdersController,
 );
 
 router.get(
@@ -31,7 +38,7 @@ router.get(
   authenticate,
   isAdmin,
   celebrate(getAllOrdersSchema),
-  getAllOrders,
+  getAllOrdersController,
 );
 
 router.patch(
@@ -39,7 +46,7 @@ router.patch(
   authenticate,
   isAdmin,
   celebrate(updateOrderStatusSchema),
-  updateOrderStatus,
+  updateOrderStatusController,
 );
 
 export default router;

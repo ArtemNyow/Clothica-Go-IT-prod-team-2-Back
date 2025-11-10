@@ -164,7 +164,7 @@ const spec = {
       get: {
         tags: ['Users'],
         summary: 'Get current authorized user',
-        security: [{ cookieAuth: [] }], // якщо використовуєш cookie для авторизації
+        security: [{ cookieAuth: [] }],
         responses: {
           200: {
             description: 'Current user',
@@ -215,47 +215,225 @@ const spec = {
     },
 
     // ===== ORDERS =====
-    '/api/orders': {
-      post: {
+    '/api/orders/my': {
+      get: {
         tags: ['Orders'],
-        summary: 'Create order from cart (uses x-session-id or req.user)',
+        summary: 'Get orders of the current authorized user',
+        security: [{ cookieAuth: [] }],
         parameters: [
           {
-            name: 'x-session-id',
-            in: 'header',
-            required: false,
-            schema: { type: 'string' },
-            description: 'Session identifier to bind anonymous cart',
+            name: 'page',
+            in: 'query',
+            schema: { type: 'integer', default: 1 },
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            schema: { type: 'integer', default: 20 },
           },
         ],
         responses: {
           200: {
-            description: 'Order created and cart emptied',
+            description: 'List of user orders',
             content: {
               'application/json': {
                 schema: {
                   type: 'object',
-                  properties: { data: { $ref: '#/components/schemas/Order' } },
+                  properties: {
+                    message: {
+                      type: 'string',
+                      example: 'Orders retrieved successfully',
+                    },
+                    page: { type: 'integer' },
+                    perPage: { type: 'integer' },
+                    totalOrders: { type: 'integer' },
+                    totalPages: { type: 'integer' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Order' },
+                    },
+                  },
                 },
               },
             },
           },
-          400: {
-            description: 'Cart empty',
+          401: { $ref: '#/components/responses/BadRequest' },
+          500: { $ref: '#/components/responses/ServerError' },
+        },
+      },
+    },
+
+    '/api/orders/all': {
+      get: {
+        tags: ['Orders'],
+        summary: 'Get all orders (admin only)',
+        security: [{ cookieAuth: [] }],
+        parameters: [
+          {
+            name: 'status',
+            in: 'query',
+            schema: { type: 'string', example: 'in_progress' },
+          },
+          {
+            name: 'page',
+            in: 'query',
+            schema: { type: 'integer', default: 1 },
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            schema: { type: 'integer', default: 20 },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'List of all orders',
             content: {
               'application/json': {
-                schema: { $ref: '#/components/schemas/Error' },
+                schema: {
+                  type: 'object',
+                  properties: {
+                    message: {
+                      type: 'string',
+                      example: 'All orders retrieved successfully',
+                    },
+                    page: { type: 'integer' },
+                    perPage: { type: 'integer' },
+                    totalOrders: { type: 'integer' },
+                    totalPages: { type: 'integer' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Order' },
+                    },
+                  },
+                },
               },
             },
           },
-          401: {
-            description: 'Unauthorized (if required by middleware)',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/Error' },
+          401: { $ref: '#/components/responses/BadRequest' },
+          403: { $ref: '#/components/responses/BadRequest' },
+          500: { $ref: '#/components/responses/ServerError' },
+        },
+      },
+    },
+
+    '/api/orders/:id/status': {
+      patch: {
+        tags: ['Orders'],
+        summary: 'Update order status (admin only)',
+        security: [{ cookieAuth: [] }],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            schema: { type: 'string', format: 'objectId' },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  status: {
+                    type: 'string',
+                    enum: ['in_progress', 'completed', 'cancelled'],
+                    example: 'completed',
+                  },
+                },
+                required: ['status'],
               },
             },
           },
+        },
+        responses: {
+          200: {
+            description: 'Order status updated successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    message: {
+                      type: 'string',
+                      example: 'Статус замовлення оновлено',
+                    },
+                    data: { $ref: '#/components/schemas/Order' },
+                  },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/BadRequest' },
+          403: { $ref: '#/components/responses/BadRequest' },
+          404: { description: 'Order not found' },
+          500: { $ref: '#/components/responses/ServerError' },
+        },
+      },
+    },
+
+    '/api/orders': {
+      post: {
+        tags: ['Orders'],
+        summary: 'Create a new order from cart',
+        parameters: [
+          {
+            name: 'x-session-id',
+            in: 'header',
+            schema: { type: 'string' },
+            description: 'Session identifier for anonymous cart',
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  items: {
+                    type: 'array',
+                    items: { $ref: '#/components/schemas/OrderItem' },
+                  },
+                  shippingInfo: {
+                    type: 'object',
+                    properties: {
+                      firstName: { type: 'string' },
+                      lastName: { type: 'string' },
+                      phone: { type: 'string' },
+                      city: { type: 'string' },
+                      postOffice: { type: 'string' },
+                      comment: { type: 'string', nullable: true },
+                    },
+                  },
+                },
+                required: ['items', 'shippingInfo'],
+              },
+            },
+          },
+        },
+        responses: {
+          201: {
+            description: 'Order created successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    message: {
+                      type: 'string',
+                      example: 'Order created successfully',
+                    },
+                    data: { $ref: '#/components/schemas/Order' },
+                  },
+                },
+              },
+            },
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          401: { $ref: '#/components/responses/BadRequest' },
           500: { $ref: '#/components/responses/ServerError' },
         },
       },
@@ -693,6 +871,74 @@ const spec = {
           description: { type: 'string' },
         },
         required: ['goodId', 'author', 'description'],
+      }, // ---- Order related schemas
+      OrderItem: {
+        type: 'object',
+        properties: {
+          goodId: { $ref: '#/components/schemas/ObjectId' },
+          qty: { type: 'integer', minimum: 1, example: 2 },
+          price: { type: 'number', example: 1200 },
+          size: { type: 'string', example: 'M' },
+        },
+        required: ['goodId', 'qty', 'price', 'size'],
+      },
+
+      ShippingInfo: {
+        type: 'object',
+        properties: {
+          firstName: { type: 'string', example: 'Ivan' },
+          lastName: { type: 'string', example: 'Ivanov' },
+          phone: { type: 'string', example: '380991112233' },
+          city: { type: 'string', example: 'Kyiv' },
+          postOffice: { type: 'string', example: '10' },
+          comment: {
+            type: 'string',
+            nullable: true,
+            example: 'Leave at post office',
+          },
+        },
+        required: ['firstName', 'lastName', 'phone', 'city', 'postOffice'],
+      },
+
+      OrderTotals: {
+        type: 'object',
+        properties: {
+          subtotal: { type: 'number', example: 1200 },
+          shipping: { type: 'number', example: 50 },
+          total: { type: 'number', example: 1250 },
+        },
+        required: ['subtotal', 'shipping', 'total'],
+      },
+
+      Order: {
+        type: 'object',
+        properties: {
+          _id: { $ref: '#/components/schemas/ObjectId' },
+          userId: { $ref: '#/components/schemas/ObjectId', nullable: true },
+          guestSession: { type: 'string', nullable: true },
+          orderNumber: { type: 'string', example: '№251110001' },
+          items: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/OrderItem' },
+          },
+          shippingInfo: { $ref: '#/components/schemas/ShippingInfo' },
+          totals: { $ref: '#/components/schemas/OrderTotals' },
+          status: {
+            type: 'string',
+            enum: ['in_progress', 'completed', 'cancelled'],
+            example: 'in_progress',
+          },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+        required: [
+          '_id',
+          'orderNumber',
+          'items',
+          'shippingInfo',
+          'totals',
+          'status',
+        ],
       },
 
       // ---- Subscriptions
