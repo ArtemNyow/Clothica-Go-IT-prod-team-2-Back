@@ -1,24 +1,18 @@
 import createHttpError from 'http-errors';
-import Cart from '../models/cart.js';
-import Order from '../models/order.js';
+import {Cart} from '../models/cart.js';
+import {Order} from '../models/order.js';
 import { ORDER_STATUS, STATUS } from '../constants/status.js';
+
+const generateOrderNumber = () => {
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 7).toUpperCase();
+  return `ORD-${timestamp}-${random}`;
+};
 
 export const createOrder = async (req, res, next) => {
   const sessionId = req.header('x-session-id');
-  const userId = req.user?.userId;
+  const userId = req.user?._id;
   const { shippingInfo } = req.body;
-
-  if (
-    !shippingInfo ||
-    !shippingInfo.firstName ||
-    !shippingInfo.lastName ||
-    !shippingInfo.phone ||
-    !shippingInfo.city ||
-    !shippingInfo.postOffice
-  ) {
-    next(createHttpError(400, 'Shipping information is incomplete'));
-    return;
-  }
 
   const cart = await Cart.findOne({
     $or: [{ sessionId }, { userId }],
@@ -37,6 +31,7 @@ export const createOrder = async (req, res, next) => {
   const total = subtotal + shipping;
 
   const order = await Order.create({
+    orderNumber: generateOrderNumber(), // Генеруємо унікальний номер
     userId: userId || null,
     items: cart.items.map((item) => ({
       goodId: item.goodId._id,
@@ -64,6 +59,8 @@ export const createOrder = async (req, res, next) => {
   });
 };
 
+
+
 export const getUserOrders = async (req, res) => {
   const userId = req.user.userId;
 
@@ -76,6 +73,8 @@ export const getUserOrders = async (req, res) => {
     data: orders,
   });
 };
+
+
 
 export const updateOrderStatus = async (req, res, next) => {
   const { id } = req.params;
@@ -106,6 +105,8 @@ export const updateOrderStatus = async (req, res, next) => {
     data: order,
   });
 };
+
+
 
 export const getAllOrders = async (req, res) => {
   const { status, page = 1, limit = 20 } = req.query;

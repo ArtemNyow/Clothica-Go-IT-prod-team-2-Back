@@ -16,6 +16,7 @@ import goodRoutes from './routes/goodRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
 import subscriptionRoutes from './routes/subscriptionRoutes.js';
+import cartRoutes from './routes/cartRoutes.js';
 
 import swaggerUi from 'swagger-ui-express';
 import spec from './swagger/spec.js';
@@ -38,6 +39,7 @@ app.use(authRouter);
 app.use(categoryRoutes);
 app.use(goodRoutes);
 app.use(feedbackRoutes);
+app.use(cartRoutes);
 app.use(orderRoutes);
 app.use(subscriptionRoutes);
 

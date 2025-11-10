@@ -47,5 +47,5 @@ const cartSchema = new Schema(
 
 cartSchema.index({ userId: 1 });
 
-const Cart = model('Cart', cartSchema);
-export default Cart;
+export const Cart = model('Cart', cartSchema);
+

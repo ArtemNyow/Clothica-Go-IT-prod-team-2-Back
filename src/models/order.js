@@ -108,5 +108,5 @@ orderSchema.pre('save', async function (next) {
   next();
 });
 
-const Order = model('Order', orderSchema);
-export default Order;
+export const Order = model('Order', orderSchema);
+
