@@ -1,6 +1,5 @@
 import createHttpError from 'http-errors';
-import {Cart} from '../models/cart.js';
-import {Order} from '../models/order.js';
+import { Order } from '../models/order.js';
 import { ORDER_STATUS, STATUS } from '../constants/status.js';
 
 const generateOrderNumber = () => {
@@ -14,42 +13,42 @@ export const createOrder = async (req, res, next) => {
   const userId = req.user?._id;
   const { shippingInfo } = req.body;
 
-  const cart = await Cart.findOne({
-    $or: [{ sessionId }, { userId }],
-  }).populate('items.goodId');
+  // const cart = await Cart.findOne({
+  //   $or: [{ sessionId }, { userId }],
+  // }).populate('items.goodId');
 
-  if (!cart || cart.items.length === 0) {
-    next(createHttpError(400, 'Cart is empty'));
-    return;
-  }
+  // if (!cart || cart.items.length === 0) {
+  //   next(createHttpError(400, 'Cart is empty'));
+  //   return;
+  // }
 
-  const subtotal = cart.items.reduce((sum, item) => {
-    return sum + item.price * item.qty;
-  }, 0);
+  // const subtotal = cart.items.reduce((sum, item) => {
+  //   return sum + item.price * item.qty;
+  // }, 0);
 
   const shipping = subtotal >= 1000 ? 0 : 50;
   const total = subtotal + shipping;
 
-  const order = await Order.create({
-    orderNumber: generateOrderNumber(), // Генеруємо унікальний номер
-    userId: userId || null,
-    items: cart.items.map((item) => ({
-      goodId: item.goodId._id,
-      size: item.size,
-      qty: item.qty,
-      price: item.price,
-    })),
-    shippingInfo,
-    totals: {
-      subtotal,
-      shipping,
-      total,
-    },
-    status: STATUS.IN_PROGRESS,
-  });
+  // const order = await Order.create({
+  //   orderNumber: generateOrderNumber(), // Генеруємо унікальний номер
+  //   userId: userId || null,
+  //   items: cart.items.map((item) => ({
+  //     goodId: item.goodId._id,
+  //     size: item.size,
+  //     qty: item.qty,
+  //     price: item.price,
+  //   })),
+  //   shippingInfo,
+  //   totals: {
+  //     subtotal,
+  //     shipping,
+  //     total,
+  //   },
+  //   status: STATUS.IN_PROGRESS,
+  // });
 
-  cart.items = [];
-  await cart.save();
+  // cart.items = [];
+  // await cart.save();
 
   await order.populate('items.goodId');
 
@@ -58,8 +57,6 @@ export const createOrder = async (req, res, next) => {
     data: order,
   });
 };
-
-
 
 export const getUserOrders = async (req, res) => {
   const userId = req.user.userId;
@@ -73,8 +70,6 @@ export const getUserOrders = async (req, res) => {
     data: orders,
   });
 };
-
-
 
 export const updateOrderStatus = async (req, res, next) => {
   const { id } = req.params;
@@ -105,8 +100,6 @@ export const updateOrderStatus = async (req, res, next) => {
     data: order,
   });
 };
-
-
 
 export const getAllOrders = async (req, res) => {
   const { status, page = 1, limit = 20 } = req.query;
