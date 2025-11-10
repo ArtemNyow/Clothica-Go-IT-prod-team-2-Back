@@ -30,11 +30,11 @@ const userSchema = new Schema(
     },
     city: {
       type: String,
-      required: true,
+      trim: true,
     },
     postOffice: {
       type: String,
-      required: true,
+      trim: true,
     },
   },
   { timestamps: true, versionKey: false },
