@@ -16,7 +16,7 @@ import goodRoutes from './routes/goodRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
 import subscriptionRoutes from './routes/subscriptionRoutes.js';
-
+import userRoutes from './routes/userRoutes.js';
 import swaggerUi from 'swagger-ui-express';
 import spec from './swagger/spec.js';
 
@@ -40,6 +40,7 @@ app.use(goodRoutes);
 app.use(feedbackRoutes);
 app.use(orderRoutes);
 app.use(subscriptionRoutes);
+app.use(userRoutes);
 
 app.use(notFoundHandler);
 

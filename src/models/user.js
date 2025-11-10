@@ -28,6 +28,14 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    city: {
+      type: String,
+      trim: true,
+    },
+    postOffice: {
+      type: String,
+      trim: true,
+    },
   },
   { timestamps: true, versionKey: false },
 );
