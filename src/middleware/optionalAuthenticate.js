@@ -3,7 +3,7 @@ import { Session } from '../models/session.js';
 import { User } from '../models/user.js';
 
 export const optionalAuthenticate = async (req, res, next) => {
-  const token = req.cookies.accessToken; // беремо токен з cookie
+  const token = req.cookies.accessToken;
   if (!token) {
     req.user = null;
     return next();
