@@ -14,12 +14,10 @@ import {
 } from '../validations/orderValidation.js';
 import { authenticate } from '../middleware/authenticate.js';
 import { isAdmin } from '../middleware/isAdmin.js';
-// import { optionalAuth } from '../middleware/optionalAuth.js';
 
 const router = express.Router();
 
 router.post('/api/orders', celebrate(createOrderSchema), createOrder);
-// router.post('/api/orders', optionalAuth, celebrate(createOrderSchema), createOrder);
 
 router.get(
   '/api/orders/my',
