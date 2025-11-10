@@ -225,33 +225,60 @@ const spec = {
     //   },
     // },
 
-    // // ===== USERS =====
-    // '/api/users/me': {
-    //   get: {
-    //     tags: ['Users'],
-    //     summary: 'Get current authorized user',
-    //     responses: {
-    //       200: {
-    //         description: 'Current user',
-    //         content: {
-    //           'application/json': {
-    //             schema: { $ref: '#/components/schemas/User' },
-    //           },
-    //         },
-    //       },
-    //       401: {
-    //         description: 'Unauthorized',
-    //         content: {
-    //           'application/json': {
-    //             schema: { $ref: '#/components/schemas/Error' },
-    //           },
-    //         },
-    //       },
-    //       404: { $ref: '#/components/responses/NotFound' },
-    //       500: { $ref: '#/components/responses/ServerError' },
-    //     },
-    //   },
-    // },
+    // ===== USERS =====
+    '/api/user/me': {
+      get: {
+        tags: ['Users'],
+        summary: 'Get current authorized user',
+        security: [{ cookieAuth: [] }], // якщо використовуєш cookie для авторизації
+        responses: {
+          200: {
+            description: 'Current user',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/User' },
+              },
+            },
+          },
+          401: {
+            description: 'Unauthorized',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+          404: { $ref: '#/components/responses/NotFound' },
+          500: { $ref: '#/components/responses/ServerError' },
+        },
+      },
+    },
+
+    '/api/user/edit': {
+      patch: {
+        tags: ['Users'],
+        summary: 'Update current authorized user',
+        security: [{ cookieAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  firstName: { type: 'string' },
+                  lastName: { type: 'string' },
+                  email: { type: 'string' },
+                  phone: { type: 'number' },
+                  city: { type: 'string' },
+                  postOffice: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
 
     // ===== ORDERS =====
     '/api/orders': {
@@ -553,10 +580,13 @@ const spec = {
           lastName: { type: 'string' },
           email: { type: 'string', nullable: true },
           phone: { type: 'number' },
+          isAdmin: { type: 'boolean' },
+          city: { type: 'string', nullable: true },
+          postOffice: { type: 'string', nullable: true },
           createdAt: { type: 'string', format: 'date-time', nullable: true },
           updatedAt: { type: 'string', format: 'date-time', nullable: true },
         },
-        required: ['_id', 'name', 'phone'],
+        required: ['_id', 'firstName', 'phone'],
       },
 
       AuthRegisterByPhone: {
