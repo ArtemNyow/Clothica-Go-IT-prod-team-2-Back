@@ -7,19 +7,24 @@ import {
   updateOrderStatusController,
 } from '../controllers/orderController.js';
 
+import { authenticate } from '../middleware/authenticate.js';
+import { isAdmin } from '../middleware/isAdmin.js';
 import {
   createOrderSchema,
   getUserOrdersSchema,
   getAllOrdersSchema,
   updateOrderStatusSchema,
 } from '../validations/orderValidation.js';
-
-import { authenticate } from '../middleware/authenticate.js';
-import { isAdmin } from '../middleware/isAdmin.js';
+import { optionalAuthenticate } from '../middleware/optionalAuthenticate.js';
 
 const router = express.Router();
 
-router.post('/api/orders', celebrate(createOrderSchema), createOrderController);
+router.post(
+  '/api/orders',
+  optionalAuthenticate,
+  celebrate(createOrderSchema),
+  createOrderController,
+);
 
 router.get(
   '/api/orders/my',
