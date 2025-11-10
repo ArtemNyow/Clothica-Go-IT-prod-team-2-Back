@@ -509,7 +509,7 @@ const spec = {
           firstName: { type: 'string', nullable: true },
           lastName: { type: 'string', nullable: true },
           email: { type: 'string', nullable: true },
-          phone: { type: 'string', example: '380991112233' },
+          phone: { type: 'number', example: '380991112233' },
           createdAt: { type: 'string', format: 'date-time', nullable: true },
           updatedAt: { type: 'string', format: 'date-time', nullable: true },
         },
@@ -520,10 +520,10 @@ const spec = {
         type: 'object',
         properties: {
           phone: {
-            type: 'string',
+            type: 'Number',
             description: 'Digits only. Example: 380991112233',
           },
-          password: { type: 'string', minLength: 8 },
+          password: { type: 'Number', minLength: 8 },
           name: { type: 'string' },
         },
         required: ['phone', 'password', 'name'],
@@ -532,7 +532,7 @@ const spec = {
         type: 'object',
         properties: {
           phone: {
-            type: 'string',
+            type: 'Number',
             description: 'Digits only. Example: 380991112233',
           },
           password: { type: 'string' },
