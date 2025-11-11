@@ -40,6 +40,28 @@ export const getGoods = async (req, res, next) => {
       Good.find(filter).skip(skip).limit(perPageNum).lean(),
     ]);
 
+    if (!goods || goods.length === 0) {
+      return next(createHttpError(404, 'No goods found'));
+    }
+    const goodsWithFeedbacks = await Promise.all(
+      goods.map(async (good) => {
+        const feedbacks = await Feedback.find({ goodId: good._id }).lean();
+        const feedbackCount = feedbacks.length;
+        const avgRating =
+          feedbackCount > 0
+            ? feedbacks.reduce((sum, f) => sum + (f.rate || 0), 0) /
+              feedbackCount
+            : 0;
+
+        return {
+          ...good,
+          feedbackCount,
+          avgRating: Number(avgRating.toFixed(1)),
+          feedbacks,
+        };
+      }),
+    );
+
     const totalPages = Math.max(1, Math.ceil(totalGoods / perPageNum));
 
     res.status(200).json({
@@ -47,7 +69,7 @@ export const getGoods = async (req, res, next) => {
       perPage: perPageNum,
       totalGoods,
       totalPages,
-      data: goods,
+      data: goodsWithFeedbacks,
     });
   } catch (err) {
     next(err);
