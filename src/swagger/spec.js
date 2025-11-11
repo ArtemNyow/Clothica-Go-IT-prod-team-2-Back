@@ -439,11 +439,15 @@ const spec = {
       },
     },
 
-    // ===== GOODS =====
+    // ===== GOODS (UPDATED) =====
     '/api/goods': {
       get: {
         tags: ['Goods'],
-        summary: 'Get goods list with filters & pagination',
+        summary:
+          'Get goods list with filters, pagination, feedback count and avg rating',
+        description:
+          'Повертає сторінку товарів із фільтрацією за категорією, розміром, статтю та діапазоном цін. ' +
+          'Кожен товар містить кількість відгуків, середній рейтинг і масив відгуків.',
         parameters: [
           {
             name: 'page',
@@ -489,7 +493,8 @@ const spec = {
         ],
         responses: {
           200: {
-            description: 'Paged goods list',
+            description:
+              'Paged goods list із полями feedbackCount, avgRating, feedbacks[]',
             content: {
               'application/json': {
                 schema: {
@@ -501,10 +506,39 @@ const spec = {
                     totalPages: { type: 'integer' },
                     data: {
                       type: 'array',
-                      items: { $ref: '#/components/schemas/Good' },
+                      items: {
+                        allOf: [
+                          { $ref: '#/components/schemas/Good' },
+                          {
+                            type: 'object',
+                            properties: {
+                              feedbackCount: { type: 'integer' },
+                              avgRating: {
+                                type: 'number',
+                                format: 'float',
+                                example: 4.3,
+                              },
+                              feedbacks: {
+                                type: 'array',
+                                items: {
+                                  $ref: '#/components/schemas/Feedback',
+                                },
+                              },
+                            },
+                          },
+                        ],
+                      },
                     },
                   },
                 },
+              },
+            },
+          },
+          404: {
+            description: 'No goods found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
               },
             },
           },
@@ -516,7 +550,9 @@ const spec = {
     '/api/goods/{goodId}': {
       get: {
         tags: ['Goods'],
-        summary: 'Get good by id',
+        summary: 'Get single good by ID with feedbacks, count and avg rating',
+        description:
+          'Повертає товар за ID з кількістю відгуків, середнім рейтингом та масивом відгуків.',
         parameters: [
           {
             name: 'goodId',
@@ -527,14 +563,29 @@ const spec = {
         ],
         responses: {
           200: {
-            description: 'Good',
+            description: 'Good object with feedback statistics',
             content: {
               'application/json': {
-                schema: { $ref: '#/components/schemas/Good' },
+                schema: {
+                  allOf: [
+                    { $ref: '#/components/schemas/Good' },
+                    {
+                      type: 'object',
+                      properties: {
+                        feedbackCount: { type: 'integer' },
+                        avgRating: { type: 'number', example: 4.5 },
+                        feedbacks: {
+                          type: 'array',
+                          items: { $ref: '#/components/schemas/Feedback' },
+                        },
+                      },
+                    },
+                  ],
+                },
               },
             },
           },
-          404: { $ref: '#/components/responses/NotFound' },
+          404: { description: 'Good not found' },
           400: { $ref: '#/components/responses/BadRequest' },
           500: { $ref: '#/components/responses/ServerError' },
         },
@@ -871,7 +922,9 @@ const spec = {
           description: { type: 'string' },
         },
         required: ['goodId', 'author', 'description'],
-      }, // ---- Order related schemas
+      },
+
+      // ---- Order related schemas (дубликати збережено як у твоєму файлі)
       OrderItem: {
         type: 'object',
         properties: {
@@ -970,6 +1023,8 @@ const spec = {
       BadRequest: { description: 'Bad request' },
       NotFound: { description: 'Not found' },
     },
+
+    
   },
 };
 
