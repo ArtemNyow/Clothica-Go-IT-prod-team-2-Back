@@ -22,7 +22,15 @@ import spec from './swagger/spec.js';
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
-
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://clothica-go-it-prod-team-2-front-ju.vercel.app',
+];
+app.use(
+  cors({
+    origin: allowedOrigins,
+  }),
+);
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'Welcome to Clothica API' });
 });
@@ -30,7 +38,7 @@ app.use(logger);
 app.use(express.json());
 app.use(
   cors({
-    origin: 'http://localhost:3000',
+    origin: allowedOrigins,
     credentials: true,
   }),
 );
