@@ -127,7 +127,7 @@ const spec = {
       },
     },
     '/api/auth/refresh': {
-      post: {
+      get: {
         tags: ['Auth'],
         summary: 'Refresh session using cookies (sessionId + refreshToken)',
         responses: {
@@ -1023,8 +1023,6 @@ const spec = {
       BadRequest: { description: 'Bad request' },
       NotFound: { description: 'Not found' },
     },
-
-
   },
 };
 
