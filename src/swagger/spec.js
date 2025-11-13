@@ -317,7 +317,7 @@ const spec = {
       },
     },
 
-    '/api/orders/:id/status': {
+    '/api/orders/{id}/status': {
       patch: {
         tags: ['Orders'],
         summary: 'Update order status (admin only)',
@@ -1024,7 +1024,7 @@ const spec = {
       NotFound: { description: 'Not found' },
     },
 
-    
+
   },
 };
 
