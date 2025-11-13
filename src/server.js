@@ -24,7 +24,7 @@ const app = express();
 const PORT = process.env.PORT ?? 3000;
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://clothica-go-it-prod-team-2-front-ju.vercel.app',
+  'https://clothica-go-it-prod-team-2-front-ju.vercel.app/api',
 ];
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'Welcome to Clothica API' });
