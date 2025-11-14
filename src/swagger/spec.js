@@ -127,7 +127,7 @@ const spec = {
       },
     },
     '/api/auth/refresh': {
-      get: {
+      post: {
         tags: ['Auth'],
         summary: 'Refresh session using cookies (sessionId + refreshToken)',
         responses: {
