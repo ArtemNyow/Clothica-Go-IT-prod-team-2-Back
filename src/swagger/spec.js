@@ -1,3 +1,5 @@
+import { GENDERS } from '../constants/gender.js';
+
 // src/swagger/spec.js
 const spec = {
   openapi: '3.0.3',
@@ -478,7 +480,7 @@ const spec = {
           {
             name: 'gender',
             in: 'query',
-            schema: { type: 'string', enum: ['male', 'female', 'unisex'] },
+            schema: { type: 'string', enum: GENDERS },
           },
           {
             name: 'minPrice',
@@ -886,7 +888,7 @@ const spec = {
           prevDescription: { type: 'string', nullable: true },
           gender: {
             type: 'string',
-            enum: ['male', 'female', 'unisex'],
+            enum: GENDERS,
             nullable: true,
           },
         },
