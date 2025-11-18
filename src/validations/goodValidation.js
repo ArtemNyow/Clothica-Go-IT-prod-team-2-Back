@@ -5,14 +5,10 @@ import { Joi, Segments } from 'celebrate';
 
 const splitSizes = (value, helpers) => {
   if (value === undefined || value === null || value === '') return undefined;
-
-  const arr = Array.isArray(value)
-    ? value
-    : String(value)
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
-
+  const arr = String(value)
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
   const invalid = arr.filter((s) => !SIZES.includes(s));
   if (invalid.length) {
     return helpers.message(`Size must be one of: ${SIZES.join(', ')}`);
