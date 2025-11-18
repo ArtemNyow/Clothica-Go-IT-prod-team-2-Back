@@ -3,29 +3,26 @@ import { Good } from '../models/good.js';
 import { Feedback } from '../models/feedback.js';
 
 export const getGoods = async (req, res, next) => {
-  const {
-    page = 1,
-    perPage = 10,
-    category,
-    size,
-    minPrice,
-    maxPrice,
-    gender,
-  } = req.query;
   try {
-    const pageNum = Math.max(1, parseInt(page ?? '1', 10));
-    const perPageNum = Math.min(50, Math.max(1, parseInt(perPage ?? '10', 10)));
+    const {
+      page = 1,
+      perPage = 12,
+      category,
+      size,
+      minPrice,
+      maxPrice,
+      gender,
+    } = req.query;
+
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const perPageNum = Math.min(50, Math.max(1, parseInt(perPage, 10)));
     const skip = (pageNum - 1) * perPageNum;
 
     const filter = {};
 
-    if (category) {
-      filter.category = category;
-    }
+    if (category) filter.category = category;
 
-    if (Array.isArray(size) && size.length > 0) {
-      filter.size = { $in: size };
-    }
+    if (size?.length) filter.size = { $in: size };
 
     if (gender) filter.gender = gender;
 
@@ -43,6 +40,7 @@ export const getGoods = async (req, res, next) => {
     if (!goods || goods.length === 0) {
       return next(createHttpError(404, 'No goods found'));
     }
+
     const goodsWithFeedbacks = await Promise.all(
       goods.map(async (good) => {
         const feedbacks = await Feedback.find({ goodId: good._id }).lean();
