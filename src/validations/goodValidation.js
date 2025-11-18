@@ -4,29 +4,29 @@ import { objectIdValidator } from './idValidation.js';
 import { Joi, Segments } from 'celebrate';
 
 const splitSizes = (value, helpers) => {
-  if (!value) return undefined;
+  if (value === undefined || value === null || value === '') return undefined;
 
-  // Завжди приводимо до масиву
-  const arr = Array.isArray(value) ? value : [value];
+  const arr = Array.isArray(value)
+    ? value
+    : String(value)
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
 
   const invalid = arr.filter((s) => !SIZES.includes(s));
   if (invalid.length) {
     return helpers.message(`Size must be one of: ${SIZES.join(', ')}`);
   }
-
   return arr;
 };
 
-export const getGoodsSchema = celebrate({
+export const getGoodsSchema = {
   [Segments.QUERY]: Joi.object({
     page: Joi.number().integer().min(1).default(1),
     perPage: Joi.number().integer().min(1).default(12),
     category: Joi.string().custom(objectIdValidator),
     size: Joi.alternatives()
-      .try(
-        Joi.string(), // одиночний size
-        Joi.array().items(Joi.string()), // кілька size
-      )
+      .try(Joi.array().items(Joi.string()), Joi.string())
       .custom(splitSizes)
       .optional(),
     minPrice: Joi.number(),
@@ -37,4 +37,4 @@ export const getGoodsSchema = celebrate({
         'any.only': `Gender must be one of: ${GENDERS.join(', ')}`,
       }),
   }),
-});
+};
