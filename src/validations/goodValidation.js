@@ -20,14 +20,23 @@ export const getGoodsSchema = {
   [Segments.QUERY]: Joi.object({
     page: Joi.number().integer().min(1).default(1),
     perPage: Joi.number().integer().min(1).default(12),
+
     category: Joi.string().custom(objectIdValidator),
-    size: Joi.string().custom(splitSizes).optional(),
+
+    'size[]': Joi.alternatives().try(
+      Joi.string(),
+      Joi.array().items(Joi.string()),
+    ),
+
+    size: Joi.alternatives().try(Joi.string(), Joi.array().items(Joi.string())),
+
     minPrice: Joi.number(),
     maxPrice: Joi.number(),
+
     gender: Joi.string()
       .valid(...GENDERS)
       .messages({
         'any.only': `Gender must be one of: ${GENDERS.join(', ')}`,
       }),
-  }),
+  }).unknown(true),
 };

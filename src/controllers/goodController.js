@@ -7,7 +7,6 @@ export const getGoods = async (req, res, next) => {
     page = 1,
     perPage = 10,
     category,
-    size,
     minPrice,
     maxPrice,
     gender,
@@ -23,9 +22,18 @@ export const getGoods = async (req, res, next) => {
       filter.category = category;
     }
 
-    if (Array.isArray(size) && size.length > 0) {
-      filter.size = { $in: size };
-    }
+    const rawSize = req.query['size[]'] || req.query.size;
+
+   let size = [];
+   if (Array.isArray(rawSize)) {
+     size = rawSize;
+   } else if (typeof rawSize === 'string') {
+     size = [rawSize];
+   }
+
+   if (size.length > 0) {
+     filter.size = { $in: size };
+   }
 
     if (gender) filter.gender = gender;
 
