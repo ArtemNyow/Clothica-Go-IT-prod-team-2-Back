@@ -5,10 +5,14 @@ import { Joi, Segments } from 'celebrate';
 
 const splitSizes = (value, helpers) => {
   if (value === undefined || value === null || value === '') return undefined;
-  const arr = String(value)
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean);
+
+  const arr = Array.isArray(value)
+    ? value
+    : String(value)
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+
   const invalid = arr.filter((s) => !SIZES.includes(s));
   if (invalid.length) {
     return helpers.message(`Size must be one of: ${SIZES.join(', ')}`);
@@ -21,7 +25,10 @@ export const getGoodsSchema = {
     page: Joi.number().integer().min(1).default(1),
     perPage: Joi.number().integer().min(1).default(12),
     category: Joi.string().custom(objectIdValidator),
-    size: Joi.array().items(Joi.string()).single().optional(),
+    size: Joi.alternatives()
+      .try(Joi.array().items(Joi.string()), Joi.string())
+      .custom(splitSizes)
+      .optional(),
     minPrice: Joi.number(),
     maxPrice: Joi.number(),
     gender: Joi.string()
