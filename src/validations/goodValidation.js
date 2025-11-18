@@ -21,7 +21,7 @@ export const getGoodsSchema = {
     page: Joi.number().integer().min(1).default(1),
     perPage: Joi.number().integer().min(1).default(12),
     category: Joi.string().custom(objectIdValidator),
-    size: Joi.string().custom(splitSizes).optional(),
+    size: Joi.array().items(Joi.string()).single().optional(),
     minPrice: Joi.number(),
     maxPrice: Joi.number(),
     gender: Joi.string()
