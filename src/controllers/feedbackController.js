@@ -1,6 +1,6 @@
 import { Feedback } from '../models/feedback.js';
-import Good from '../models/good.js';
-import Category from '../models/category.js';
+import { Good } from '../models/good.js';
+import { Category } from '../models/category.js';
 import createHttpError from 'http-errors';
 
 export const getFeedbacks = async (req, res, next) => {
@@ -54,4 +54,8 @@ export const getFeedbacks = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+export const createFeedback = async (req, res) => {
+  const feedback = await Feedback.create({ ...req.body });
+  res.status(201).json(feedback);
 };
