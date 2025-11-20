@@ -913,6 +913,7 @@ const spec = {
           author: { type: 'string' },
           description: { type: 'string' },
           date: { type: 'string', format: 'date-time' },
+          categoryId: { $ref: '#/components/schemas/ObjectId' },
         },
         required: ['_id', 'goodId', 'author', 'description', 'date'],
       },
